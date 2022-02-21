@@ -109,15 +109,15 @@ QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(sour
 			if isOnline then
 				employees[#employees+1] = {
 				empSource = isOnline.PlayerData.citizenid,
-				grade = isOnline.PlayerData.job.grade,
-				isboss = isOnline.PlayerData.job.isboss,
+				grade = isOnline.PlayerData.gang.grade,
+				isboss = isOnline.PlayerData.gang.isboss,
 				name = '🟢' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
 				}
 			else
 				employees[#employees+1] = {
 				empSource = value.citizenid,
-				grade =  json.decode(value.job).grade,
-				isboss = json.decode(value.job).isboss,
+				grade =  json.decode(value.gang).grade,
+				isboss = json.decode(value.gang).isboss,
 				name = '❌' ..  json.decode(value.charinfo).firstname .. ' ' .. json.decode(value.charinfo).lastname
 				}
 			end
