@@ -1,4 +1,4 @@
-# qb-bossmenu
+# qb-management
 
 New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-input, with SQL support for society funds!
 
