@@ -4,7 +4,7 @@ New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-i
 
 ## Dependencies
 - [qb-core](https://github.com/qbcore-framework/qb-core)
-- [qb-logs](https://github.com/qbcore-framework/qb-logs)
+- [qb-smallresources](https://github.com/qbcore-framework/qb-smallresources) (For the Logs)
 - [qb-input](https://github.com/qbcore-framework/qb-input)
 - [qb-menu](https://github.com/qbcore-framework/qb-menu)
 - [qb-inventory](https://github.com/qbcore-framework/qb-inventory)
