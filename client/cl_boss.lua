@@ -52,6 +52,19 @@ RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
 					event = "qb-bossmenu:client:Wardrobe",
 				}
 			},
+			{
+				header = "💰 Money Management",
+				txt = "Check your Company Balance",
+				params = {
+					event = "qb-bossmenu:client:SocietyMenu",
+				}
+			},
+			{
+				header = "Exit",
+				params = {
+					event = "qb-menu:closeMenu",
+				}
+			},
 		}
 	exports['qb-menu']:openMenu(bossMenu)
 end)
