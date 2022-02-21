@@ -64,13 +64,13 @@ RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
 					event = "qb-gangmenu:client:Warbobe",
 				}
 			},
-			-- {
-			-- 	header = "💰 Money Management",
-			-- 	txt = "Check your Gang Balance",
-			-- 	params = {
-			-- 		event = "qb-gangmenu:client:SocietyMenu",
-			-- 	}
-			-- },
+			{
+				header = "💰 Money Management",
+				txt = "Check your Gang Balance",
+				params = {
+					event = "qb-gangmenu:client:SocietyMenu",
+				}
+			},
 			{
 				header = "Exit",
 				params = {
