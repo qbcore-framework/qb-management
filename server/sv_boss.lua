@@ -111,17 +111,20 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 				empSource = isOnline.PlayerData.citizenid, 
 				grade = isOnline.PlayerData.job.grade,
 				isboss = isOnline.PlayerData.job.isboss,
-				name = '🟢' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
+				name = '🟢 ' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
 				}
 			else
 				employees[#employees+1] = {
 				empSource = value.citizenid, 
 				grade =  json.decode(value.job).grade,
 				isboss = json.decode(value.job).isboss,
-				name = '❌' ..  json.decode(value.charinfo).firstname .. ' ' .. json.decode(value.charinfo).lastname
+				name = '❌ ' ..  json.decode(value.charinfo).firstname .. ' ' .. json.decode(value.charinfo).lastname
 				}
 			end
 		end
+		table.sort(employees, function(a, b)
+            return a.grade.level > b.grade.level
+        end)
 	end
 	cb(employees)
 end)
