@@ -3,7 +3,7 @@ local Accounts = {}
 
 CreateThread(function()
 	Wait(500)
-	local bossmenu = exports.oxmysql:executeSync('SELECT * FROM bossmenu', {})
+	local bossmenu = MySQL.Sync.fetchAll('SELECT * FROM bossmenu', {})
 	if not bossmenu then
 		return
 	end
@@ -34,7 +34,7 @@ RegisterNetEvent("qb-bossmenu:server:withdrawMoney", function(amount)
 		return
 	end
 	
-	exports.oxmysql:execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[job], job})
+	MySQL.Async.execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[job], job})
 	TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Withdraw Money', "blue", xPlayer.PlayerData.name.. "Withdrawal $" .. amount .. ' (' .. job .. ')', true)
 	TriggerClientEvent('QBCore:Notify', src, "You have withdrawn: $" ..amount, "success")
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
@@ -57,7 +57,7 @@ RegisterNetEvent("qb-bossmenu:server:depositMoney", function(amount)
 		return
 	end
 
-	exports.oxmysql:execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[job], job })
+	MySQL.Async.execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[job], job })
 	TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Deposit Money', "blue", xPlayer.PlayerData.name.. "Deposit $" .. amount .. ' (' .. job .. ')', true)
 	TriggerClientEvent('QBCore:Notify', src, "You have deposited: $" ..amount, "success")
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
@@ -69,7 +69,7 @@ RegisterNetEvent("qb-bossmenu:server:addAccountMoney", function(account, amount)
 	end
 
 	Accounts[account] = Accounts[account] + amount
-	exports.oxmysql:execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[account], account })
+	MySQL.Async.execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[account], account })
 end)
 
 RegisterNetEvent("qb-bossmenu:server:removeAccountMoney", function(account, amount)
@@ -81,7 +81,7 @@ RegisterNetEvent("qb-bossmenu:server:removeAccountMoney", function(account, amou
 		Accounts[account] = Accounts[account] - amount
 	end
 
-	exports.oxmysql:execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[account], account })
+	MySQL.Async.execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[account], account })
 end)
 
 QBCore.Functions.CreateCallback('qb-bossmenu:server:GetAccount', function(source, cb, jobname)
@@ -101,7 +101,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 	if not Accounts[jobname] then
 		Accounts[jobname] = 0
 	end
-	local players = exports.oxmysql:executeSync("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
+	local players = MySQL.Sync.fetchAll("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
 	if players[1] ~= nil then
 		for key, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
@@ -170,7 +170,7 @@ RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 			job.grade = {}
 			job.grade.name = nil
 			job.grade.level = 0
-			exports.oxmysql:execute('UPDATE players SET job = ? WHERE citizenid = ?', { json.encode(job), target })
+			MySQL.Async.execute('UPDATE players SET job = ? WHERE citizenid = ?', { json.encode(job), target })
 			TriggerClientEvent('QBCore:Notify', src, "Employee fired!", "success")
 			TriggerEvent("qb-log:server:CreateLog", "bossmenu", "Job Fire", "red", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.job.name .. ")", false)
 		else
