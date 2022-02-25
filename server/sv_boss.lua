@@ -153,12 +153,16 @@ RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 	local Player = QBCore.Functions.GetPlayer(src)
 	local Employee = QBCore.Functions.GetPlayerByCitizenId(target)
 	if Employee then
-		if Employee.Functions.SetJob("unemployed", '0') then
-			TriggerEvent("qb-log:server:CreateLog", "bossmenu", "Job Fire", "red", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.job.name .. ")", false)
-			TriggerClientEvent('QBCore:Notify', src, "Employee fired!", "success")
-			TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source , "You have been fired! Good luck.", "error")
+		if target ~= Player.PlayerData.citizenid then
+			if Employee.Functions.SetJob("unemployed", '0') then
+				TriggerEvent("qb-log:server:CreateLog", "bossmenu", "Job Fire", "red", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.job.name .. ")", false)
+				TriggerClientEvent('QBCore:Notify', src, "Employee fired!", "success")
+				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source , "You have been fired! Good luck.", "error")
+			else
+				TriggerClientEvent('QBCore:Notify', src, "Error..", "error")
+			end
 		else
-			TriggerClientEvent('QBCore:Notify', src, "Error..", "error")
+			TriggerClientEvent('QBCore:Notify', src, "You can\'t fire yourself", "error")
 		end
 	else
 		local player = exports.oxmysql:executeSync('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { target })

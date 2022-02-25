@@ -150,12 +150,16 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 	local Player = QBCore.Functions.GetPlayer(src)
 	local Employee = QBCore.Functions.GetPlayerByCitizenId(target)
 	if Employee then
-		if Employee.Functions.SetGang("none", '0') then
-			TriggerEvent("qb-log:server:CreateLog", "gangmenu", "Gang Fire", "orange", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.gang.name .. ")", false)
-			TriggerClientEvent('QBCore:Notify', src, "Gang Member fired!", "success")
-			TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source , "You have been expelled from the gang!", "error")
+		if target ~= Player.PlayerData.citizenid then
+			if Employee.Functions.SetGang("none", '0') then
+				TriggerEvent("qb-log:server:CreateLog", "gangmenu", "Gang Fire", "orange", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.gang.name .. ")", false)
+				TriggerClientEvent('QBCore:Notify', src, "Gang Member fired!", "success")
+				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source , "You have been expelled from the gang!", "error")
+			else
+				TriggerClientEvent('QBCore:Notify', src, "Error.", "error")
+			end
 		else
-			TriggerClientEvent('QBCore:Notify', src, "Error.", "error")
+			TriggerClientEvent('QBCore:Notify', src, "You can\'t kick yourself out of the gang!", "error")
 		end
 	else
 		local player = MySQL.Sync.fetchAll('SELECT * FROM players WHERE citizenid = ? LIMIT 1', {target})
