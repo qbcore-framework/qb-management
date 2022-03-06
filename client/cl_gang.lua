@@ -161,8 +161,8 @@ RegisterNetEvent('qb-gangmenu:lient:ManageMember', function(data)
                 event = "qb-gangmenu:server:GradeUpdate",
                 args = {
                     cid = data.player.empSource,
-                    degree = tonumber(k),
-                    named = v.name
+                    grade = tonumber(k),
+                    gradename = v.name
                 }
             }
         }
