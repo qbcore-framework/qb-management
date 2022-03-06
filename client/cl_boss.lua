@@ -148,8 +148,8 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
                 event = "qb-bossmenu:server:GradeUpdate",
                 args = {
                     cid = data.player.empSource,
-                    grado = tonumber(k),
-                    nomegrado = v.name
+                    degree = tonumber(k),
+                    named = v.name
                 }
             }
         }
