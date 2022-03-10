@@ -3,20 +3,20 @@ CREATE TABLE IF NOT EXISTS `management_menu` (
 `id` INT(11) NOT NULL AUTO_INCREMENT,
 `job_name` VARCHAR(50) NOT NULL,
 `amount`  INT(100) NOT NULL,
-`job_type` ENUM('boss','gang') NOT NULL DEFAULT 'boss',
+`menu_type` ENUM('boss','gang') NOT NULL DEFAULT 'boss',
 PRIMARY KEY (`id`),
 UNIQUE KEY `job_name` (`job_name`),
-KEY `job_type` (`job_type`)
+KEY `menu_type` (`menu_type`)
 );
 
 -- First we do boss menu (THIS WILL PULL YOUR CURRENT bossmenu DATA AND ADD IT TO THE NEWLY CREATED TABLE)
-INSERT INTO `management_menu` (`job_name`, `amount`, `job_type`)
+INSERT INTO `management_menu` (`job_name`, `amount`, `menu_type`)
 SELECT job_name, amount, 'boss' FROM bossmenu;
 
 
 --[[ You can remove all of this if you want, this is just to confirm everything moved over correctly ]]--
 SET @totalbossmenu = (SELECT COUNT(*) FROM `bossmenu`);
-SET @managemenu_boss = (SELECT COUNT(*) FROM `management_menu` WHERE job_type = 'boss');
+SET @managemenu_boss = (SELECT COUNT(*) FROM `management_menu` WHERE menu_type = 'boss');
 
 SELECT CONCAT("TOTAL BOSS MENU: ", @totalbossmenu);
 SELECT CONCAT("TOTAL MANAGE MENU: ", @managemenu_boss);
@@ -35,13 +35,13 @@ DELIMITER ;
 
 
 -- Lastly we do the gang menu (THIS WILL PULL YOUR CURRENT gangmenu DATA AND ADD IT TO THE NEWLY CREATED TABLE)
-INSERT INTO `management_menu` (`job_name`, `amount`, `job_type`)
+INSERT INTO `management_menu` (`job_name`, `amount`, `menu_type`)
 SELECT job_name, amount, 'gang' FROM gangmenu;
 
 
 --[[ You can remove all of this if you want, this is just to confirm everything moved over correctly ]]--
 SET @totalgangmenu = (SELECT COUNT(*) FROM `gangmenu`);
-SET @managemenu_gang = (SELECT COUNT(*) FROM `management_menu` WHERE job_type = 'gang');
+SET @managemenu_gang = (SELECT COUNT(*) FROM `management_menu` WHERE menu_type = 'gang');
 
 SELECT CONCAT("TOTAL GANG MENU: ", @totalgangmenu);
 SELECT CONCAT("TOTAL MANAGE GANG MENU: ", @managemenu_gang);

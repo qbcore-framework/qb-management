@@ -3,13 +3,13 @@ CREATE TABLE IF NOT EXISTS `management_menu` (
 `id` INT(11) NOT NULL AUTO_INCREMENT,
 `job_name` VARCHAR(50) NOT NULL,
 `amount`  INT(100) NOT NULL,
-`job_type` ENUM('boss','gang') NOT NULL DEFAULT 'boss',
+`menu_type` ENUM('boss','gang') NOT NULL DEFAULT 'boss',
 PRIMARY KEY (`id`),
 UNIQUE KEY `job_name` (`job_name`),
-KEY `job_type` (`job_type`)
+KEY `menu_type` (`menu_type`)
 );
 
-INSERT INTO `management_menu` (`job_name`, `amount`, `job_type`) VALUES
+INSERT INTO `management_menu` (`job_name`, `amount`, `menu_type`) VALUES
 ('police', 0, 'boss'),
 ('ambulance', 0, 'boss'),
 ('realestate', 0, 'boss'),

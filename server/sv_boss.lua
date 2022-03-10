@@ -3,7 +3,7 @@ local Accounts = {}
 
 CreateThread(function()
 	Wait(500)
-	local bossmenu = MySQL.Sync.fetchAll('SELECT * FROM management_menu WHERE job_type = "boss"', {})
+	local bossmenu = MySQL.Sync.fetchAll('SELECT * FROM management_menu WHERE menu_type = "boss"', {})
 	if not bossmenu then
 		return
 	end
@@ -34,7 +34,7 @@ RegisterNetEvent("qb-bossmenu:server:withdrawMoney", function(amount)
 		return
 	end
 	
-	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND job_type = "boss"', { Accounts[job], job})
+	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND menu_type = "boss"', { Accounts[job], job})
 	TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Withdraw Money', "blue", xPlayer.PlayerData.name.. "Withdrawal $" .. amount .. ' (' .. job .. ')', true)
 	TriggerClientEvent('QBCore:Notify', src, "You have withdrawn: $" ..amount, "success")
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
@@ -57,7 +57,7 @@ RegisterNetEvent("qb-bossmenu:server:depositMoney", function(amount)
 		return
 	end
 
-	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND job_type = "boss"', { Accounts[job], job })
+	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND menu_type = "boss"', { Accounts[job], job })
 	TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Deposit Money', "blue", xPlayer.PlayerData.name.. "Deposit $" .. amount .. ' (' .. job .. ')', true)
 	TriggerClientEvent('QBCore:Notify', src, "You have deposited: $" ..amount, "success")
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
@@ -69,7 +69,7 @@ RegisterNetEvent("qb-bossmenu:server:addAccountMoney", function(account, amount)
 	end
 
 	Accounts[account] = Accounts[account] + amount
-	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND job_type = "boss"', { Accounts[account], account })
+	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND menu_type = "boss"', { Accounts[account], account })
 end)
 
 RegisterNetEvent("qb-bossmenu:server:removeAccountMoney", function(account, amount)
@@ -81,7 +81,7 @@ RegisterNetEvent("qb-bossmenu:server:removeAccountMoney", function(account, amou
 		Accounts[account] = Accounts[account] - amount
 	end
 
-	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND job_type = "boss"', { Accounts[account], account })
+	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND menu_type = "boss"', { Accounts[account], account })
 end)
 
 QBCore.Functions.CreateCallback('qb-bossmenu:server:GetAccount', function(source, cb, jobname)

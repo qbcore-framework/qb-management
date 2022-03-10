@@ -24,7 +24,7 @@ New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-i
 
 ## ATTENTION
 ### YOU NEED TO CREATE A ROW IN DATABASE WITH NAME OF SOCIETY IN MANAGEMENT_MENU TABLE IF YOU HAVE CUSTOM JOBS / GANGS
-![database](https://i.imgur.com/jEYEIu9.png)
+![database](https://i.imgur.com/6cd3NLU.png)
 
 # License
 
