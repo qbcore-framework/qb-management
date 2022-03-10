@@ -17,13 +17,14 @@ New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-i
 ## Installation
 ### Manual
 - Download the script and put it in the `[qb]` directory.
-- Import `qb-bossmenu.sql` in your database
+- IF NEW SERVER: Import `qb-management_menu_new.sql` in your database
+- IF EXISTING SERVER: Import `qb-management_menu_upgrade.sql` in your database
 - Edit config.lua with coords
 - Restart Script / Server
 
 ## ATTENTION
-### YOU NEED TO CREATE A COLUMN IN DATABASE WITH NAME OF SOCIETY IN BOSSMENU TABLE OR GANG IN GANGMENU TABLE IF YOU HAVE CUSTOMS JOBS / GANGS
-![database](https://i.imgur.com/JZnEK4M.png)
+### YOU NEED TO CREATE A ROW IN DATABASE WITH NAME OF SOCIETY IN MANAGEMENT_MENU TABLE IF YOU HAVE CUSTOM JOBS / GANGS
+![database](https://i.imgur.com/jEYEIu9.png)
 
 # License
 

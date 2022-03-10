@@ -3,7 +3,7 @@ local GangaccountGangs = {}
 
 CreateThread(function()
 	Wait(500)
-	local gangmenu = MySQL.Sync.fetchAll('SELECT * FROM gangmenu', {})
+	local gangmenu = MySQL.Sync.fetchAll('SELECT * FROM management_menu WHERE job_type = "gang"', {})
 	if not gangmenu then
 		return
 	end
@@ -34,7 +34,7 @@ RegisterNetEvent("qb-gangmenu:server:withdrawMoney", function(amount)
 		return
 	end
 
-	MySQL.Async.execute('UPDATE gangmenu SET amount = ? WHERE job_name = ?', { GangaccountGangs[gang], gang })
+	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND job_type = "gang"', { GangaccountGangs[gang], gang })
 	TriggerEvent('qb-log:server:CreateLog', 'gangmenu', 'Withdraw Money', 'yellow', xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname .. ' successfully withdrew $' .. amount .. ' (' .. gang .. ')', false)
 	TriggerClientEvent('QBCore:Notify', src, "You have withdrawn: $" ..amount, "success")
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
@@ -57,7 +57,7 @@ RegisterNetEvent("qb-gangmenu:server:depositMoney", function(amount)
 		return
 	end
 
-	MySQL.Async.execute('UPDATE gangmenu SET amount = ? WHERE job_name = ?', { GangaccountGangs[gang], gang })
+	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND job_type = "gang"', { GangaccountGangs[gang], gang })
 	TriggerEvent('qb-log:server:CreateLog', 'gangmenu', 'Deposit Money', 'yellow', xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname .. ' successfully deposited $' .. amount .. ' (' .. gang .. ')', false)
 	TriggerClientEvent('QBCore:Notify', src, "You have deposited: $" ..amount, "success")
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
@@ -69,7 +69,7 @@ RegisterNetEvent("qb-gangmenu:server:addaccountGangMoney", function(accountGang,
 	end
 
 	GangaccountGangs[accountGang] = GangaccountGangs[accountGang] + amount
-	MySQL.Async.execute('UPDATE gangmenu SET amount = ? WHERE job_name = ?', { GangaccountGangs[accountGang], accountGang })
+	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND job_type = "gang"', { GangaccountGangs[accountGang], accountGang })
 end)
 
 RegisterNetEvent("qb-gangmenu:server:removeaccountGangMoney", function(accountGang, amount)
@@ -81,7 +81,7 @@ RegisterNetEvent("qb-gangmenu:server:removeaccountGangMoney", function(accountGa
 		GangaccountGangs[accountGang] = GangaccountGangs[accountGang] - amount
 	end
 
-	MySQL.Async.execute('UPDATE gangmenu SET amount = ? WHERE job_name = ?', { GangaccountGangs[accountGang], accountGang })
+	MySQL.Async.execute('UPDATE management_menu SET amount = ? WHERE job_name = ? AND job_type = "gang"', { GangaccountGangs[accountGang], accountGang })
 end)
 
 QBCore.Functions.CreateCallback('qb-gangmenu:server:GetAccount', function(source, cb, GangName)
