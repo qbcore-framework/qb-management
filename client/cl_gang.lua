@@ -295,7 +295,7 @@ CreateThread(function()
             exports['qb-target']:AddBoxZone(key.."-GangMenu", data.coords, data.length, data.width, {
                 name = key.."-GangMenu",
                 heading = data.heading,
-                debugPoly = true,
+                -- debugPoly = true,
                 minZ = data.minZ,
                 maxZ = data.maxZ,
             }, {

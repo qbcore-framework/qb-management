@@ -293,7 +293,7 @@ CreateThread(function()
             exports['qb-target']:AddBoxZone(key.."-BossMenu", data.coords, data.length, data.width, {
                 name = key.."-BossMenu",
                 heading = data.heading,
-                debugPoly = true,
+                -- debugPoly = true,
                 minZ = data.minZ,
                 maxZ = data.maxZ,
             }, {
