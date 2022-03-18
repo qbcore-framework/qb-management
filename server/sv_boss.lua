@@ -25,7 +25,7 @@ function AddMoney(account, amount)
 	end
 
 	Accounts[account] = Accounts[account] + amount
-	MySQL.Async.execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[account], account })
+	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
 end
 
 function RemoveMoney(account, amount)
@@ -39,12 +39,12 @@ function RemoveMoney(account, amount)
 		isRemoved = true
 	end
 
-	MySQL.Async.execute('UPDATE bossmenu SET amount = ? WHERE job_name = ?', { Accounts[account], account })
+	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
 	return isRemoved
 end
 
 MySQL.ready(function ()
-	local bossmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM bossmenu', {})
+	local bossmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM management_funds WHERE type = "boss"', {})
 	if not bossmenu then return end
 
 	for _,v in ipairs(bossmenu) do

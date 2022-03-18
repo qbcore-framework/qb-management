@@ -11,7 +11,7 @@ function AddGangMoney(account, amount)
 	end
 
 	GangAccounts[account] = GangAccounts[account] + amount
-	MySQL.Async.execute('UPDATE gangmenu SET amount = ? WHERE job_name = ?', { GangAccounts[account], account })
+	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
 end
 
 function RemoveGangMoney(account, amount)
@@ -25,12 +25,12 @@ function RemoveGangMoney(account, amount)
 		isRemoved = true
 	end
 
-	MySQL.Async.execute('UPDATE gangmenu SET amount = ? WHERE job_name = ?', { GangAccounts[account], account })
+	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
 	return isRemoved
 end
 
 MySQL.ready(function ()
-	local gangmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM gangmenu', {})
+	local gangmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM management_funds WHERE type = "gang"', {})
 	if not gangmenu then return end
 
 	for _,v in ipairs(gangmenu) do
