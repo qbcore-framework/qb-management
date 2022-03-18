@@ -1,5 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local PlayerGang = {}
+local PlayerGang = QBCore.Functions.GetPlayerData().gang
 local shownGangMenu = false
 
 -- UTIL
@@ -288,37 +288,65 @@ RegisterNetEvent('qb-gangmenu:client:SocietyWithdraw', function(saldoattuale)
 end)
 
 -- MAIN THREAD
+
 CreateThread(function()
-    while true do
-        local pos = GetEntityCoords(PlayerPedId())
-        local inRangeGang = false
-        local nearGangmenu = false
-        for k, v in pairs(Config.Gangs) do
-            if k == PlayerGang.name and PlayerGang.isboss then
-                if #(pos - v) < 5.0 then
-                    inRangeGang = true
-                    if #(pos - v) <= 1.5 then
-                        if not shownGangMenu then DrawText3DGang(v, "~b~E~w~ - Open Gang Management") end
-                        nearGangmenu = true
-                        if IsControlJustReleased(0, 38) then
-                            TriggerEvent("qb-gangmenu:client:OpenMenu")
+    if Config.UseTarget then
+        for key, data in pairs(Config.GangMenuZones) do
+            exports['qb-target']:AddBoxZone(key.."-GangMenu", data.coords, data.length, data.width, {
+                name = key.."-GangMenu",
+                heading = data.heading,
+                -- debugPoly = true,
+                minZ = data.minZ,
+                maxZ = data.maxZ,
+            }, {
+                options = {
+                    {
+                        type = "client",
+                        event = "qb-gangmenu:client:OpenMenu",
+                        icon = "fas fa-sign-in-alt",
+                        label = "Gang Menu",
+                        gang = data.gang,
+                    },
+                },
+                distance = 2.5
+            })
+        end
+    else
+        while true do
+            local wait = 2500
+            local pos = GetEntityCoords(PlayerPedId())
+            local inRangeGang = false
+            local nearGangmenu = false
+            if PlayerGang then
+                wait = 0
+                for k, v in pairs(Config.GangMenus) do
+                    if k == PlayerGang.name and PlayerGang.isboss then
+                        if #(pos - v) < 5.0 then
+                            inRangeGang = true
+                            if #(pos - v) <= 1.5 then
+                                nearGangmenu = true
+                                if not shownGangMenu then DrawText3DGang(v, "~b~E~w~ - Open Gang Management") end
+                                if IsControlJustReleased(0, 38) then
+                                    TriggerEvent("qb-gangmenu:client:OpenMenu")
+                                end
+                            end
+                            
+                            if not nearGangmenu and shownGangMenu then
+                                CloseMenuFullGang()
+                                shownGangMenu = false
+                            end
                         end
                     end
-                    
-                    if not nearGangmenu and shownGangMenu then
+                end
+                if not inRangeGang then
+                    Wait(1500)
+                    if shownGangMenu then
                         CloseMenuFullGang()
                         shownGangMenu = false
                     end
                 end
             end
+            Wait(wait)
         end
-        if not inRangeGang then
-            Wait(1500)
-            if shownGangMenu then
-                CloseMenuFullGang()
-                shownGangMenu = false
-            end
-        end
-        Wait(5)
     end
 end)

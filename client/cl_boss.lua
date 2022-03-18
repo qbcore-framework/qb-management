@@ -1,5 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local PlayerJob = {}
+local PlayerJob = QBCore.Functions.GetPlayerData().job
 local shownBossMenu = false
 
 -- UTIL
@@ -34,9 +34,8 @@ local function comma_value(amount)
     return formatted
 end
 
-AddEventHandler('onResourceStart', function(resource)--if you restart the resource
+AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then
-        Wait(200)
         PlayerJob = QBCore.Functions.GetPlayerData().job
     end
 end)
@@ -50,7 +49,8 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
 end)
 
 RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
-    shownBossMenu = true
+    if not PlayerJob.name or not PlayerJob.isboss then return end
+
     local bossMenu = {
         {
             header = "Boss Menu - " .. string.upper(PlayerJob.label),
@@ -288,36 +288,63 @@ end)
 
 -- MAIN THREAD
 CreateThread(function()
-    while true do
-        local pos = GetEntityCoords(PlayerPedId())
-        local inRangeBoss = false
-        local nearBossmenu = false
-        for k, v in pairs(Config.Jobs) do
-            if k == PlayerJob.name and PlayerJob.isboss then
-                if #(pos - v) < 5.0 then
-                    inRangeBoss = true
-                    if #(pos - v) <= 1.5 then
-                        if not shownBossMenu then DrawText3D(v, "~b~E~w~ - Open Job Management") end
-                        nearBossmenu = true
-                        if IsControlJustReleased(0, 38) then
-                            TriggerEvent("qb-bossmenu:client:OpenMenu")
+    if Config.UseTarget then
+        for key, data in pairs(Config.BossMenuZones) do
+            exports['qb-target']:AddBoxZone(key.."-BossMenu", data.coords, data.length, data.width, {
+                name = key.."-BossMenu",
+                heading = data.heading,
+                -- debugPoly = true,
+                minZ = data.minZ,
+                maxZ = data.maxZ,
+            }, {
+                options = {
+                    {
+                        type = "client",
+                        event = "qb-bossmenu:client:OpenMenu",
+                        icon = "fas fa-sign-in-alt",
+                        label = "Boss Menu",
+                        job = data.job,
+                    },
+                },
+                distance = 2.5
+            })
+        end
+    else
+        while true do
+            local wait = 2500
+            local pos = GetEntityCoords(PlayerPedId())
+            local inRangeBoss = false
+            local nearBossmenu = false
+            if PlayerJob then
+                wait = 0
+                for k, v in pairs(Config.BossMenus) do
+                    if k == PlayerJob.name and PlayerJob.isboss then
+                        if #(pos - v) < 5.0 then
+                            inRangeBoss = true
+                            if #(pos - v) <= 1.5 then
+                                nearBossmenu = true
+                                if not shownBossMenu then DrawText3D(v, "~b~E~w~ - Open Job Management") end
+                                if IsControlJustReleased(0, 38) then
+                                    TriggerEvent("qb-bossmenu:client:OpenMenu")
+                                end
+                            end
+                            
+                            if not nearBossmenu and shownBossMenu then
+                                CloseMenuFull()
+                                shownBossMenu = false
+                            end
                         end
                     end
-                    
-                    if not nearBossmenu and shownBossMenu then
+                end
+                if not inRangeBoss then
+                    Wait(1500)
+                    if shownBossMenu then
                         CloseMenuFull()
                         shownBossMenu = false
                     end
                 end
             end
+            Wait(wait)
         end
-        if not inRangeBoss then
-            Wait(1500)
-            if shownBossMenu then
-                CloseMenuFull()
-                shownBossMenu = false
-            end
-        end
-        Wait(3)
     end
 end)
