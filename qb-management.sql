@@ -9,7 +9,7 @@ UNIQUE KEY `job_name` (`job_name`),
 KEY `type` (`type`)
 );
 
-INSERT INTO `management_menu` (`job_name`, `amount`, `type`) VALUES
+INSERT INTO `management_funds` (`job_name`, `amount`, `type`) VALUES
 ('police', 0, 'boss'),
 ('ambulance', 0, 'boss'),
 ('realestate', 0, 'boss'),
