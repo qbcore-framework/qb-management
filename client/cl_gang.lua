@@ -315,7 +315,7 @@ CreateThread(function()
                                 if #(pos - coords) <= 1.5 then
                                     nearGangmenu = true
                                     if not shownGangMenu then 
-                                        exports['qb-core']:DrawText('left', '[E] Open Gang Management')
+                                        exports['qb-core']:DrawText('[E] Open Gang Management', 'left')
                                     end
 
                                     if IsControlJustReleased(0, 38) then
