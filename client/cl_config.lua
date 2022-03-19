@@ -16,11 +16,11 @@ Config.BossMenus = {
 Config.BossMenuZones = {
     ['MRPD'] = { 
         coords = vector3(461.45, -986.2, 30.73), length = 0.35, width = 0.45, heading = 351.0, minZ = 30.58, maxZ = 30.68,
-        job = { ['police'] = 4, ['sasp'] = 1, ['bcso'] = 5 },
+        job = { ['police'] = 4, ['sasp'] = 1, ['bcso'] = 4 },
     },
     ['Pillbox'] = { 
         coords = vector3(335.46, -594.52, 43.28), length = 1.2, width = 0.6, heading = 341.0, minZ = 43.13, maxZ = 43.73,
-        job = { ['ambulance'] = 5 },
+        job = { ['ambulance'] = 4 },
     },
     ['Dynasty8'] = { 
         coords = vector3(-716.11, 261.21, 84.14), length = 0.6, width = 1.0, heading = 25.0, minZ = 83.943, maxZ = 84.74,
