@@ -313,7 +313,7 @@ CreateThread(function()
                                 if #(pos - coords) <= 1.5 then
                                     nearBossmenu = true
                                     if not shownBossMenu then 
-                                        exports['qb-core']:DrawText('left', '[E] Open Job Management')
+                                        exports['qb-core']:DrawText('[E] Open Job Management', 'left')
                                         shownBossMenu = true
                                     end
                                     if IsControlJustReleased(0, 38) then
