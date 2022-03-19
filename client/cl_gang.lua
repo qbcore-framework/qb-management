@@ -5,22 +5,8 @@ local shownGangMenu = false
 -- UTIL
 local function CloseMenuFullGang()
     exports['qb-menu']:closeMenu()
+    exports['qb-core'].HideText()
     shownGangMenu = false
-end
-
-local function DrawText3DGang(v, text)
-    SetTextScale(0.35, 0.35)
-    SetTextFont(4)
-    SetTextProportional(1)
-    SetTextColour(255, 255, 255, 215)
-    SetTextEntry("STRING")
-    SetTextCentre(true)
-    AddTextComponentString(text)
-    SetDrawOrigin(v, 0)
-    DrawText(0.0, 0.0)
-    local factor = (string.len(text)) / 370
-    DrawRect(0.0, 0.0 + 0.0125, 0.017 + factor, 0.03, 0, 0, 0, 0)
-    ClearDrawOrigin()
 end
 
 local function comma_valueGang(amount)
@@ -291,25 +277,27 @@ end)
 
 CreateThread(function()
     if Config.UseTarget then
-        for key, data in pairs(Config.GangMenuZones) do
-            exports['qb-target']:AddBoxZone(key.."-GangMenu", data.coords, data.length, data.width, {
-                name = key.."-GangMenu",
-                heading = data.heading,
-                -- debugPoly = true,
-                minZ = data.minZ,
-                maxZ = data.maxZ,
-            }, {
-                options = {
-                    {
-                        type = "client",
-                        event = "qb-gangmenu:client:OpenMenu",
-                        icon = "fas fa-sign-in-alt",
-                        label = "Gang Menu",
-                        gang = data.gang,
+        for gang, zones in pairs(Config.GangMenuZones) do
+            for index, data in ipairs(zones) do
+                exports['qb-target']:AddBoxZone(gang.."-GangMenu"..index, data.coords, data.length, data.width, {
+                    name = gang.."-GangMenu"..index,
+                    heading = data.heading,
+                    -- debugPoly = true,
+                    minZ = data.minZ,
+                    maxZ = data.maxZ,
+                }, {
+                    options = {
+                        {
+                            type = "client",
+                            event = "qb-gangmenu:client:OpenMenu",
+                            icon = "fas fa-sign-in-alt",
+                            label = "Gang Menu",
+                            canInteract = function() return gang == PlayerGang.name and PlayerGang.isboss end,
+                        },
                     },
-                },
-                distance = 2.5
-            })
+                    distance = 2.5
+                })
+            end
         end
     else
         while true do
@@ -319,21 +307,27 @@ CreateThread(function()
             local nearGangmenu = false
             if PlayerGang then
                 wait = 0
-                for k, v in pairs(Config.GangMenus) do
-                    if k == PlayerGang.name and PlayerGang.isboss then
-                        if #(pos - v) < 5.0 then
-                            inRangeGang = true
-                            if #(pos - v) <= 1.5 then
-                                nearGangmenu = true
-                                if not shownGangMenu then DrawText3DGang(v, "~b~E~w~ - Open Gang Management") end
-                                if IsControlJustReleased(0, 38) then
-                                    TriggerEvent("qb-gangmenu:client:OpenMenu")
+                for k, menus in pairs(Config.GangMenus) do
+                    for _, coords in ipairs(menus) do
+                        if k == PlayerGang.name and PlayerGang.isboss then
+                            if #(pos - coords) < 5.0 then
+                                inRangeGang = true
+                                if #(pos - coords) <= 1.5 then
+                                    nearGangmenu = true
+                                    if not shownGangMenu then 
+                                        exports['qb-core'].DrawText('left', '[E] Open Gang Management')
+                                    end
+
+                                    if IsControlJustReleased(0, 38) then
+                                        exports['qb-core'].HideText()
+                                        TriggerEvent("qb-gangmenu:client:OpenMenu")
+                                    end
                                 end
-                            end
-                            
-                            if not nearGangmenu and shownGangMenu then
-                                CloseMenuFullGang()
-                                shownGangMenu = false
+                                
+                                if not nearGangmenu and shownGangMenu then
+                                    CloseMenuFullGang()
+                                    shownGangMenu = false
+                                end
                             end
                         end
                     end

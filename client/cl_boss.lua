@@ -5,22 +5,8 @@ local shownBossMenu = false
 -- UTIL
 local function CloseMenuFull()
     exports['qb-menu']:closeMenu()
+    exports['qb-core'].HideText()
     shownBossMenu = false
-end
-
-local function DrawText3D(v, text)
-    SetTextScale(0.35, 0.35)
-    SetTextFont(4)
-    SetTextProportional(1)
-    SetTextColour(255, 255, 255, 215)
-    SetTextEntry("STRING")
-    SetTextCentre(true)
-    AddTextComponentString(text)
-    SetDrawOrigin(v, 0)
-    DrawText(0.0, 0.0)
-    local factor = (string.len(text)) / 370
-    DrawRect(0.0, 0.0 + 0.0125, 0.017 + factor, 0.03, 0, 0, 0, 0)
-    ClearDrawOrigin()
 end
 
 local function comma_value(amount)
@@ -289,25 +275,27 @@ end)
 -- MAIN THREAD
 CreateThread(function()
     if Config.UseTarget then
-        for key, data in pairs(Config.BossMenuZones) do
-            exports['qb-target']:AddBoxZone(key.."-BossMenu", data.coords, data.length, data.width, {
-                name = key.."-BossMenu",
-                heading = data.heading,
-                -- debugPoly = true,
-                minZ = data.minZ,
-                maxZ = data.maxZ,
-            }, {
-                options = {
-                    {
-                        type = "client",
-                        event = "qb-bossmenu:client:OpenMenu",
-                        icon = "fas fa-sign-in-alt",
-                        label = "Boss Menu",
-                        job = data.job,
+        for job, zones in pairs(Config.BossMenuZones) do
+            for index, data in ipairs(zones) do
+                exports['qb-target']:AddBoxZone(job.."-BossMenu-"..index, data.coords, data.length, data.width, {
+                    name = job.."-BossMenu-"..index,
+                    heading = data.heading,
+                    -- debugPoly = true,
+                    minZ = data.minZ,
+                    maxZ = data.maxZ,
+                }, {
+                    options = {
+                        {
+                            type = "client",
+                            event = "qb-bossmenu:client:OpenMenu",
+                            icon = "fas fa-sign-in-alt",
+                            label = "Boss Menu",
+                            canInteract = function() return job == PlayerJob.name and PlayerJob.isboss end,
+                        },
                     },
-                },
-                distance = 2.5
-            })
+                    distance = 2.5
+                })
+            end
         end
     else
         while true do
@@ -317,21 +305,27 @@ CreateThread(function()
             local nearBossmenu = false
             if PlayerJob then
                 wait = 0
-                for k, v in pairs(Config.BossMenus) do
-                    if k == PlayerJob.name and PlayerJob.isboss then
-                        if #(pos - v) < 5.0 then
-                            inRangeBoss = true
-                            if #(pos - v) <= 1.5 then
-                                nearBossmenu = true
-                                if not shownBossMenu then DrawText3D(v, "~b~E~w~ - Open Job Management") end
-                                if IsControlJustReleased(0, 38) then
-                                    TriggerEvent("qb-bossmenu:client:OpenMenu")
+                for k, menus in pairs(Config.BossMenus) do
+                    for _, coords in ipairs(menus) do
+                        if k == PlayerJob.name and PlayerJob.isboss then
+                            if #(pos - coords) < 5.0 then
+                                inRangeBoss = true
+                                if #(pos - coords) <= 1.5 then
+                                    nearBossmenu = true
+                                    if not shownBossMenu then 
+                                        exports['qb-core'].DrawText('left', '[E] Open Job Management')
+                                        shownBossMenu = true
+                                    end
+                                    if IsControlJustReleased(0, 38) then
+                                        exports['qb-core'].HideText()
+                                        TriggerEvent("qb-bossmenu:client:OpenMenu")
+                                    end
                                 end
-                            end
-                            
-                            if not nearBossmenu and shownBossMenu then
-                                CloseMenuFull()
-                                shownBossMenu = false
+                                
+                                if not nearBossmenu and shownBossMenu then
+                                    CloseMenuFull()
+                                    shownBossMenu = false
+                                end
                             end
                         end
                     end
