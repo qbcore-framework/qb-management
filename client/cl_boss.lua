@@ -5,7 +5,7 @@ local shownBossMenu = false
 -- UTIL
 local function CloseMenuFull()
     exports['qb-menu']:closeMenu()
-    exports['qb-core'].HideText()
+    exports['qb-core']:HideText()
     shownBossMenu = false
 end
 
@@ -313,11 +313,11 @@ CreateThread(function()
                                 if #(pos - coords) <= 1.5 then
                                     nearBossmenu = true
                                     if not shownBossMenu then 
-                                        exports['qb-core'].DrawText('left', '[E] Open Job Management')
+                                        exports['qb-core']:DrawText('left', '[E] Open Job Management')
                                         shownBossMenu = true
                                     end
                                     if IsControlJustReleased(0, 38) then
-                                        exports['qb-core'].HideText()
+                                        exports['qb-core']:HideText()
                                         TriggerEvent("qb-bossmenu:client:OpenMenu")
                                     end
                                 end
