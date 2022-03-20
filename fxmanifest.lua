@@ -15,7 +15,11 @@ server_scripts {
 
 server_exports {
     'GetAccount',
-    'GetaccountGang',
+    'AddMoney',
+    'RemoveMoney',
+    'GetGangAccount',
+    'AddGangMoney',
+    'RemoveGangMoney',
 }
 
 lua54 'yes'
