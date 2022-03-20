@@ -52,6 +52,16 @@ MySQL.ready(function ()
 	end
 end)
 
+-- BACKWARDS COMPATIBILITY
+AddEventHandler("qb-bossmenu:server:addAccountMoney", function(account, amount)
+    AddMoney(account, amount)
+end)
+
+AddEventHandler("qb-bossmenu:server:removeAccountMoney", function(account, amount)
+    RemoveMoney(account, amount)
+end)
+-- BACKWARDS COMPATIBILITY
+
 RegisterNetEvent("qb-bossmenu:server:withdrawMoney", function(amount)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)

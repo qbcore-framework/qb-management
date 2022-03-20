@@ -2,6 +2,8 @@
 
 New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-input, with SQL support for society funds!
 
+This update requires DrawText support from QB-Core. Currently you require the dev branch to do so.
+
 ## Dependencies
 - [qb-core](https://github.com/qbcore-framework/qb-core)
 - [qb-smallresources](https://github.com/qbcore-framework/qb-smallresources) (For the Logs)
@@ -20,6 +22,8 @@ New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-i
 - IF NEW SERVER: Import `qb-management.sql` in your database
 - IF EXISTING SERVER: Import `qb-management_upgrade.sql` in your database
 - Edit config.lua with coords
+- Replace any `exports['qb-bossmenu']` with `exports['qb-mangement']`
+- Make sure you are running the newest build of QB-Core that supports DrawText (Currently DEV branch)
 - Restart Script / Server
 
 ## ATTENTION
