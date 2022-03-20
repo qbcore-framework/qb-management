@@ -29,6 +29,10 @@ function RemoveGangMoney(account, amount)
 	return isRemoved
 end
 
+exports('GetGangAccount', GetGangAccount)
+exports('AddGangMoney', AddGangMoney)
+exports('RemoveGangMoney', RemoveGangMoney)
+
 MySQL.ready(function ()
 	local gangmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM management_funds WHERE type = "gang"', {})
 	if not gangmenu then return end

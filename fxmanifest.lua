@@ -13,13 +13,4 @@ server_scripts {
     'server/*.lua'
 }
 
-server_exports {
-    'GetAccount',
-    'AddMoney',
-    'RemoveMoney',
-    'GetGangAccount',
-    'AddGangMoney',
-    'RemoveGangMoney',
-}
-
 lua54 'yes'

@@ -43,6 +43,10 @@ function RemoveMoney(account, amount)
 	return isRemoved
 end
 
+exports('GetAccount', GetAccount)
+exports('AddMoney', AddMoney)
+exports('RemoveMoney', RemoveMoney)
+
 MySQL.ready(function ()
 	local bossmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM management_funds WHERE type = "boss"', {})
 	if not bossmenu then return end
