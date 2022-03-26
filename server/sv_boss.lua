@@ -177,7 +177,7 @@ RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 			local job = {}
 			job.name = "unemployed"
 			job.label = "Unemployed"
-			job.payment = 500
+			job.payment = QBCore.Shared.Jobs[job.name].grades['0'].payment or 500
 			job.onduty = true
 			job.isboss = false
 			job.grade = {}
