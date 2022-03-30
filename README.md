@@ -2,8 +2,6 @@
 
 New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-input, with SQL support for society funds!
 
-This update requires DrawText support from QB-Core. Currently you require the dev branch to do so.
-
 ## Dependencies
 - [qb-core](https://github.com/qbcore-framework/qb-core)
 - [qb-smallresources](https://github.com/qbcore-framework/qb-smallresources) (For the Logs)
