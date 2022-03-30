@@ -88,6 +88,15 @@ RegisterNetEvent("qb-bossmenu:server:depositMoney", function(amount)
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
+RegisterServerEvent("qb-bossmenu:server:addAccountMoney", function(account, amount)
+	-- Manage exceptions
+	if amount ~= math.floor(amount) or amount <= 0 then
+		return
+	end
+
+	AddMoney(account, amount)
+end)
+
 QBCore.Functions.CreateCallback('qb-bossmenu:server:GetAccount', function(source, cb, jobname)
 	local result = GetAccount(jobname)
 	cb(result)
