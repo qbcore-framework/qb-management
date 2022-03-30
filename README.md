@@ -21,7 +21,7 @@ New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-i
 - IF EXISTING SERVER: Import `qb-management_upgrade.sql` in your database
 - Edit config.lua with coords
 - Replace any `exports['qb-bossmenu']` with `exports['qb-mangement']`
-- Make sure you are running the newest build of QB-Core that supports DrawText (Currently DEV branch)
+- Make sure you are running the newest build of QB-Core that supports DrawText
 - Restart Script / Server
 
 ## ATTENTION
