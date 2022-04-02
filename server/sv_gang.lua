@@ -121,9 +121,9 @@ RegisterNetEvent('qb-gangmenu:server:GradeUpdate', function(data)
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'GradeUpdate Exploiting') return end
 
 	if Employee then
-		if Employee.Functions.SetGang(Player.PlayerData.gang.name, data.grado) then
+		if Employee.Functions.SetGang(Player.PlayerData.gang.name, data.grade) then
 			TriggerClientEvent('QBCore:Notify', src, "Successfully promoted!", "success")
-			TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, "You have been promoted to " ..data.nomegrado..".", "success")
+			TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, "You have been promoted to " ..data.gradename..".", "success")
 		else
 			TriggerClientEvent('QBCore:Notify', src, "Grade does not exist.", "error")
 		end

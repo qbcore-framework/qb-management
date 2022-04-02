@@ -134,8 +134,8 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
                 event = "qb-bossmenu:server:GradeUpdate",
                 args = {
                     cid = data.player.empSource,
-                    grado = tonumber(k),
-                    nomegrado = v.name
+                    grade = tonumber(k),
+                    gradename = v.name
                 }
             }
         }
@@ -312,7 +312,7 @@ CreateThread(function()
                                 inRangeBoss = true
                                 if #(pos - coords) <= 1.5 then
                                     nearBossmenu = true
-                                    if not shownBossMenu then 
+                                    if not shownBossMenu then
                                         exports['qb-core']:DrawText('[E] Open Job Management', 'left')
                                         shownBossMenu = true
                                     end
@@ -321,7 +321,7 @@ CreateThread(function()
                                         TriggerEvent("qb-bossmenu:client:OpenMenu")
                                     end
                                 end
-                                
+
                                 if not nearBossmenu and shownBossMenu then
                                     CloseMenuFull()
                                     shownBossMenu = false
