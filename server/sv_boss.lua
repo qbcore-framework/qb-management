@@ -30,16 +30,18 @@ end
 
 function RemoveMoney(account, amount)
 	local isRemoved = false
-	if not Accounts[account] then
-		Accounts[account] = 0
-	end
+	if amount > 0 then
+		if not Accounts[account] then
+			Accounts[account] = 0
+		end
 
-	if Accounts[account] >= amount then
-		Accounts[account] = Accounts[account] - amount
-		isRemoved = true
-	end
+		if Accounts[account] >= amount then
+			Accounts[account] = Accounts[account] - amount
+			isRemoved = true
+		end
 
-	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
+		MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
+	end
 	return isRemoved
 end
 
