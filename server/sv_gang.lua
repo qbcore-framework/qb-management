@@ -16,16 +16,18 @@ end
 
 function RemoveGangMoney(account, amount)
 	local isRemoved = false
-	if not GangAccounts[account] then
-		GangAccounts[account] = 0
-	end
+	if amount > 0 then
+		if not GangAccounts[account] then
+			GangAccounts[account] = 0
+		end
 
-	if GangAccounts[account] >= amount then
-		GangAccounts[account] = GangAccounts[account] - amount
-		isRemoved = true
-	end
+		if GangAccounts[account] >= amount then
+			GangAccounts[account] = GangAccounts[account] - amount
+			isRemoved = true
+		end
 
-	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
+		MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
+	end
 	return isRemoved
 end
 
