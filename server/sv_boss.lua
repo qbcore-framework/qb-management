@@ -72,6 +72,19 @@ RegisterNetEvent("qb-bossmenu:server:withdrawMoney", function(amount)
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
+RegisterNetEvent("qb-bossmenu:server:removeAccountMoney", function(account, amount)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+
+	if RemoveMoney(account, amount) then
+		Player.Functions.AddMoney("cash", amount, 'Boss menu withdraw')
+		TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Payment', "blue", Player.PlayerData.name.. "Paid $" .. amount .. ' (' .. account .. ')', false)
+		TriggerClientEvent('QBCore:Notify', src, "Your Soceity has paid: $" ..amount, "success")
+	else
+		TriggerClientEvent('QBCore:Notify', src, "Your society dont have enough money in the account!", "error")
+	end
+end)
+
 RegisterNetEvent("qb-bossmenu:server:depositMoney", function(amount)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
