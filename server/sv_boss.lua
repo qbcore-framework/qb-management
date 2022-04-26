@@ -89,6 +89,17 @@ RegisterNetEvent("qb-bossmenu:server:depositMoney", function(amount)
 
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
+--/// paid acount society ///--
+RegisterNetEvent("qb-bossmenu:server:addAccountMoney", function( job_paid,amount)
+	local job = job_paid
+		AddMoney(job, amount)
+		TriggerClientEvent('HksCore:Notify', src, "Has pagado: $" ..amount, "success")
+end)
+
+QBCore.Functions.CreateCallback('qb-bossmenu:server:GetAccount', function(source, cb, jobname)
+	local result = GetAccount(jobname)
+	cb(result)
+end)
 
 QBCore.Functions.CreateCallback('qb-bossmenu:server:GetAccount', function(source, cb, jobname)
 	local result = GetAccount(jobname)
