@@ -90,7 +90,7 @@ RegisterNetEvent("qb-bossmenu:server:depositMoney", function(amount)
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
-QBCore.Functions.CreateCallback('qb-bossmenu:server:GetAccount', function(source, cb, jobname)
+QBCore.Functions.CreateCallback('qb-bossmenu:server:GetAccount', function(_, cb, jobname)
 	local result = GetAccount(jobname)
 	cb(result)
 end)
@@ -105,7 +105,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 	local employees = {}
 	local players = MySQL.Sync.fetchAll("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
 	if players[1] ~= nil then
-		for key, value in pairs(players) do
+		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
 
 			if isOnline then
@@ -217,7 +217,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:getplayers', function(source, cb)
 	local players = {}
 	local PlayerPed = GetPlayerPed(src)
 	local pCoords = GetEntityCoords(PlayerPed)
-	for k, v in pairs(QBCore.Functions.GetPlayers()) do
+	for _, v in pairs(QBCore.Functions.GetPlayers()) do
 		local targetped = GetPlayerPed(v)
 		local tCoords = GetEntityCoords(targetped)
 		local dist = #(pCoords - tCoords)
