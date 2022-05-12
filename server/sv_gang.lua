@@ -76,7 +76,7 @@ RegisterNetEvent("qb-gangmenu:server:depositMoney", function(amount)
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
 
-QBCore.Functions.CreateCallback('qb-gangmenu:server:GetAccount', function(source, cb, GangName)
+QBCore.Functions.CreateCallback('qb-gangmenu:server:GetAccount', function(_, cb, GangName)
 	local gangmoney = GetGangAccount(GangName)
 	cb(gangmoney)
 end)
@@ -91,7 +91,7 @@ QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(sour
 	local employees = {}
 	local players = MySQL.Sync.fetchAll("SELECT * FROM `players` WHERE `gang` LIKE '%".. gangname .."%'", {})
 	if players[1] ~= nil then
-		for key, value in pairs(players) do
+		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
 
 			if isOnline then
@@ -200,7 +200,7 @@ QBCore.Functions.CreateCallback('qb-gangmenu:getplayers', function(source, cb)
 	local players = {}
 	local PlayerPed = GetPlayerPed(src)
 	local pCoords = GetEntityCoords(PlayerPed)
-	for k, v in pairs(QBCore.Functions.GetPlayers()) do
+	for _, v in pairs(QBCore.Functions.GetPlayers()) do
 		local targetped = GetPlayerPed(v)
 		local tCoords = GetEntityCoords(targetped)
 		local dist = #(pCoords - tCoords)
