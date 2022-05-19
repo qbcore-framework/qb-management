@@ -11,7 +11,7 @@ function AddGangMoney(account, amount)
 	end
 
 	GangAccounts[account] = GangAccounts[account] + amount
-	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
+	MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
 end
 
 function RemoveGangMoney(account, amount)
@@ -26,13 +26,13 @@ function RemoveGangMoney(account, amount)
 			isRemoved = true
 		end
 
-		MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
+		MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
 	end
 	return isRemoved
 end
 
 MySQL.ready(function ()
-	local gangmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM management_funds WHERE type = "gang"', {})
+	local gangmenu = MySQL.query.await('SELECT job_name,amount FROM management_funds WHERE type = "gang"', {})
 	if not gangmenu then return end
 
 	for _,v in ipairs(gangmenu) do
@@ -89,7 +89,7 @@ QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(sour
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'GetEmployees Exploiting') return end
 
 	local employees = {}
-	local players = MySQL.Sync.fetchAll("SELECT * FROM `players` WHERE `gang` LIKE '%".. gangname .."%'", {})
+	local players = MySQL.query.await("SELECT * FROM `players` WHERE `gang` LIKE '%".. gangname .."%'", {})
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
@@ -156,7 +156,7 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 			TriggerClientEvent('QBCore:Notify', src, "You can\'t kick yourself out of the gang!", "error")
 		end
 	else
-		local player = MySQL.Sync.fetchAll('SELECT * FROM players WHERE citizenid = ? LIMIT 1', {target})
+		local player = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? LIMIT 1', {target})
 		if player[1] ~= nil then
 			Employee = player[1]
 			local gang = {}
@@ -168,7 +168,7 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 			gang.grade = {}
 			gang.grade.name = nil
 			gang.grade.level = 0
-			MySQL.Async.execute('UPDATE players SET gang = ? WHERE citizenid = ?', {json.encode(gang), target})
+			MySQL.update('UPDATE players SET gang = ? WHERE citizenid = ?', {json.encode(gang), target})
 			TriggerClientEvent('QBCore:Notify', src, "Gang member fired!", "success")
 			TriggerEvent("qb-log:server:CreateLog", "gangmenu", "Gang Fire", "orange", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.gang.name .. ")", false)
 		else

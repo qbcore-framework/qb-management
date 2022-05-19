@@ -2,7 +2,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local Accounts = {}
 
 function ExploitBan(id, reason)
-	MySQL.Async.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', {
+	MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', {
 		GetPlayerName(id),
 		QBCore.Functions.GetIdentifier(id, 'license'),
 		QBCore.Functions.GetIdentifier(id, 'discord'),
@@ -25,7 +25,7 @@ function AddMoney(account, amount)
 	end
 
 	Accounts[account] = Accounts[account] + amount
-	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
+	MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
 end
 
 function RemoveMoney(account, amount)
@@ -40,13 +40,13 @@ function RemoveMoney(account, amount)
 			isRemoved = true
 		end
 
-		MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
+		MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
 	end
 	return isRemoved
 end
 
 MySQL.ready(function ()
-	local bossmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM management_funds WHERE type = "boss"', {})
+	local bossmenu = MySQL.query.await('SELECT job_name,amount FROM management_funds WHERE type = "boss"', {})
 	if not bossmenu then return end
 
 	for _,v in ipairs(bossmenu) do
@@ -103,7 +103,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 	if not Player.PlayerData.job.isboss then ExploitBan(src, 'GetEmployees Exploiting') return end
 
 	local employees = {}
-	local players = MySQL.Sync.fetchAll("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
+	local players = MySQL.query.await("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
@@ -173,7 +173,7 @@ RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 			TriggerClientEvent('QBCore:Notify', src, "You can\'t fire yourself", "error")
 		end
 	else
-		local player = MySQL.Sync.fetchAll('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { target })
+		local player = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { target })
 		if player[1] ~= nil then
 			Employee = player[1]
 			local job = {}
@@ -185,7 +185,7 @@ RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 			job.grade = {}
 			job.grade.name = nil
 			job.grade.level = 0
-			MySQL.Async.execute('UPDATE players SET job = ? WHERE citizenid = ?', { json.encode(job), target })
+			MySQL.update('UPDATE players SET job = ? WHERE citizenid = ?', { json.encode(job), target })
 			TriggerClientEvent('QBCore:Notify', src, "Employee fired!", "success")
 			TriggerEvent("qb-log:server:CreateLog", "bossmenu", "Job Fire", "red", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.job.name .. ")", false)
 		else
