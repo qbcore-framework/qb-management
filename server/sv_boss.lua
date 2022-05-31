@@ -25,18 +25,7 @@ function AddMoney(account, amount)
 	end
 
 	Accounts[account] = Accounts[account] + amount
-	MySQL.single("SELECT * FROM management_funds WHERE job_name = ? AND type= ? ", {account , 'boss'}, function(result)
-		if result then
-			MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = ?', { Accounts[account], account, 'boss' })
-		else
-			MySQL.query('INSERT INTO management_funds (id, job_name, amount, type) VALUES (NULL, @job_name, @amount, @type)',
-			{
-				['@job_name'] = account,
-				['@amount'] = Accounts[account],
-				['@type'] = 'boss'
-			})
-		end
-	end)
+	MySQL.query('INSERT INTO management_funds (id, job_name, amount, type) VALUES (NULL, @job_name, @amount, @type) ON DUPLICATE KEY UPDATE amount = @amount', {['@job_name'] = account, ['@amount'] = Accounts[account], ['@type'] = 'boss'})
 end
 
 function RemoveMoney(account, amount)
