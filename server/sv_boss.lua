@@ -25,7 +25,7 @@ function AddMoney(account, amount)
 	end
 
 	Accounts[account] = Accounts[account] + amount
-	MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "boss"', { Accounts[account], account })
+	MySQL.insert('INSERT INTO management_funds (id, job_name, amount, type) VALUES (NULL, @job_name, @amount, @type) ON DUPLICATE KEY UPDATE amount = @amount', {['@job_name'] = account, ['@amount'] = Accounts[account], ['@type'] = 'boss'})
 end
 
 function RemoveMoney(account, amount)
