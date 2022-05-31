@@ -11,7 +11,7 @@ function AddGangMoney(account, amount)
 	end
 
 	GangAccounts[account] = GangAccounts[account] + amount
-	MySQL.query('INSERT INTO management_funds (id, job_name, amount, type) VALUES (NULL, @job_name, @amount, @type) ON DUPLICATE KEY UPDATE amount = @amount', {['@job_name'] = account, ['@amount'] = GangAccounts[account], ['@type'] = 'gang'})
+	MySQL.insert('INSERT INTO management_funds (id, job_name, amount, type) VALUES (NULL, @job_name, @amount, @type) ON DUPLICATE KEY UPDATE amount = @amount', {['@job_name'] = account, ['@amount'] = GangAccounts[account], ['@type'] = 'gang'})
 end
 
 function RemoveGangMoney(account, amount)
