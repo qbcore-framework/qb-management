@@ -11,7 +11,18 @@ function AddGangMoney(account, amount)
 	end
 
 	GangAccounts[account] = GangAccounts[account] + amount
-	MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
+	MySQL.single("SELECT * FROM management_funds WHERE job_name = ? AND type= ? ", {account , 'gang'}, function(result)
+		if result then
+			MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = ?', { GangAccounts[account], account, 'gang' })
+		else
+			MySQL.query('INSERT INTO management_funds (id, job_name, amount, type) VALUES (NULL, @job_name, @amount, @type)',
+			{
+				['@job_name'] = account,
+				['@amount'] = GangAccounts[account],
+				['@type'] = 'gang'
+			})
+		end
+	end)
 end
 
 function RemoveGangMoney(account, amount)
