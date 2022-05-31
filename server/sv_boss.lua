@@ -25,7 +25,12 @@ function AddMoney(account, amount)
 	end
 
 	Accounts[account] = Accounts[account] + amount
-	MySQL.insert('INSERT INTO management_funds (id, job_name, amount, type) VALUES (NULL, @job_name, @amount, @type) ON DUPLICATE KEY UPDATE amount = @amount', {['@job_name'] = account, ['@amount'] = Accounts[account], ['@type'] = 'boss'})
+	MySQL.insert('INSERT INTO management_funds (job_name, amount, type) VALUES (:job_name, :amount, :type) ON DUPLICATE KEY UPDATE amount = :amount',
+		{
+			['job_name'] = account,
+			['amount'] = Accounts[account],
+			['type'] = 'boss'
+		})
 end
 
 function RemoveMoney(account, amount)
