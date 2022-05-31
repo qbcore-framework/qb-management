@@ -132,6 +132,7 @@ RegisterNetEvent('qb-gangmenu:server:GradeUpdate', function(data)
 	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid)
 
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'GradeUpdate Exploiting') return end
+	if data.grade > Player.PlayerData.gang.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot promote to this rank!", "error") return end
 
 	if Employee then
 		if Employee.Functions.SetGang(Player.PlayerData.gang.name, data.grade) then
@@ -156,6 +157,7 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 
 	if Employee then
 		if target ~= Player.PlayerData.citizenid then
+			if Employee.PlayerData.gang.grade.level > Player.PlayerData.gang.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot fire this citizen!", "error") return end
 			if Employee.Functions.SetGang("none", '0') then
 				TriggerEvent("qb-log:server:CreateLog", "gangmenu", "Gang Fire", "orange", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.gang.name .. ")", false)
 				TriggerClientEvent('QBCore:Notify', src, "Gang Member fired!", "success")
@@ -170,6 +172,8 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 		local player = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? LIMIT 1', {target})
 		if player[1] ~= nil then
 			Employee = player[1]
+			Employee.gang = json.decode(Employee.gang)
+			if Employee.gang.grade.level > Player.PlayerData.job.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot fire this citizen!", "error") return end
 			local gang = {}
 			gang.name = "none"
 			gang.label = "No Affiliation"
