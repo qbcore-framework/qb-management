@@ -13,6 +13,13 @@ server_scripts {
     'server/*.lua'
 }
 
+client_exports {
+    'AddBossMenuItem',
+    'AddGangMenuItem',
+    'RemoveBossMenuItem',
+    'RemoveGangMenuItem'
+}
+
 server_exports {
     'AddMoney',
     'AddGangMoney',
