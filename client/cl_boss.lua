@@ -28,9 +28,13 @@ local function AddBossMenuItem(data, id)
     return menuID
 end
 
+exports("AddBossMenuItem", AddBossMenuItem)
+
 local function RemoveBossMenuItem(id)
     DynamicMenuItems[id] = nil
 end
+
+exports("RemoveBossMenuItem", RemoveBossMenuItem)
 
 AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then

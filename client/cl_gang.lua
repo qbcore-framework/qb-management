@@ -56,9 +56,13 @@ local function AddGangMenuItem(data, id)
     return menuID
 end
 
+exports("AddGangMenuItem", AddGangMenuItem)
+
 local function RemoveGangMenuItem(id)
     DynamicMenuItems[id] = nil
 end
+
+exports("RemoveGangMenuItem", RemoveGangMenuItem)
 
 RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
     shownGangMenu = true
