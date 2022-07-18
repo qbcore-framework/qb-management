@@ -51,7 +51,7 @@ RegisterNetEvent('qb-gangmenu:client:Warbobe', function()
 end)
 
 local function AddGangMenuItem(data, id)
-    local menuID = id ~= nil and id or (#DynamicMenuItems + 1)
+    local menuID = id or (#DynamicMenuItems + 1)
     DynamicMenuItems[menuID] = deepcopy(data)
     return menuID
 end

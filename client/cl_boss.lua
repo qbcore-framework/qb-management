@@ -23,7 +23,7 @@ local function comma_value(amount)
 end
 
 local function AddBossMenuItem(data, id)
-    local menuID = id ~= nil and id or (#DynamicMenuItems + 1)
+    local menuID = id or (#DynamicMenuItems + 1)
     DynamicMenuItems[menuID] = deepcopy(data)
     return menuID
 end
