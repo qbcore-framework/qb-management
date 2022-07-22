@@ -1,6 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local PlayerGang = QBCore.Functions.GetPlayerData().gang
 local shownGangMenu = false
+local DynamicMenuItems = {}
 
 -- UTIL
 local function CloseMenuFullGang()
@@ -48,6 +49,20 @@ end)
 RegisterNetEvent('qb-gangmenu:client:Warbobe', function()
     TriggerEvent('qb-clothing:client:openOutfitMenu')
 end)
+
+local function AddGangMenuItem(data, id)
+    local menuID = id or (#DynamicMenuItems + 1)
+    DynamicMenuItems[menuID] = deepcopy(data)
+    return menuID
+end
+
+exports("AddGangMenuItem", AddGangMenuItem)
+
+local function RemoveGangMenuItem(id)
+    DynamicMenuItems[id] = nil
+end
+
+exports("RemoveGangMenuItem", RemoveGangMenuItem)
 
 RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
     shownGangMenu = true
@@ -97,14 +112,20 @@ RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
                 event = "qb-gangmenu:client:SocietyMenu",
             }
         },
-        {
-            header = "Exit",
-            icon = "fa-solid fa-angle-left",
-            params = {
-                event = "qb-menu:closeMenu",
-            }
-        },
     }
+
+    for _, v in pairs(DynamicMenuItems) do
+        gangMenu[#gangMenu + 1] = v
+    end
+
+    gangMenu[#gangMenu + 1] = {
+        header = "Exit",
+        icon = "fa-solid fa-angle-left",
+        params = {
+            event = "qb-menu:closeMenu",
+        }
+    }
+
     exports['qb-menu']:openMenu(gangMenu)
 end)
 

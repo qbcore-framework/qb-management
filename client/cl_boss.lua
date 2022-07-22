@@ -1,6 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local PlayerJob = QBCore.Functions.GetPlayerData().job
 local shownBossMenu = false
+local DynamicMenuItems = {}
 
 -- UTIL
 local function CloseMenuFull()
@@ -20,6 +21,20 @@ local function comma_value(amount)
     end
     return formatted
 end
+
+local function AddBossMenuItem(data, id)
+    local menuID = id or (#DynamicMenuItems + 1)
+    DynamicMenuItems[menuID] = deepcopy(data)
+    return menuID
+end
+
+exports("AddBossMenuItem", AddBossMenuItem)
+
+local function RemoveBossMenuItem(id)
+    DynamicMenuItems[id] = nil
+end
+
+exports("RemoveBossMenuItem", RemoveBossMenuItem)
 
 AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then
@@ -84,14 +99,20 @@ RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
                 event = "qb-bossmenu:client:SocietyMenu",
             }
         },
-        {
-            header = "Exit",
-            icon = "fa-solid fa-angle-left",
-            params = {
-                event = "qb-menu:closeMenu",
-            }
-        },
     }
+
+    for _, v in pairs(DynamicMenuItems) do
+        bossMenu[#bossMenu + 1] = v
+    end
+
+    bossMenu[#bossMenu + 1] = {
+        header = "Exit",
+        icon = "fa-solid fa-angle-left",
+        params = {
+            event = "qb-menu:closeMenu",
+        }
+    }
+
     exports['qb-menu']:openMenu(bossMenu)
 end)
 
