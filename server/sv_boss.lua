@@ -50,17 +50,6 @@ function RemoveMoney(account, amount)
 	return isRemoved
 end
 
-local function getPlayer(jobname)
-	local plist = {}
-	local PlayerList = MySQL.Sync.fetchAll("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
-	for k,v in pairs(PlayerList) do
-		if json.decode(value.job).name == jobname then
-			plist[#plist + 1] = PlayerList[k]
-		end
-	end
-	return plist
-end
-
 MySQL.ready(function ()
 	local bossmenu = MySQL.query.await('SELECT job_name,amount FROM management_funds WHERE type = "boss"', {})
 	if not bossmenu then return end
@@ -133,20 +122,20 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 
 	local employees = {}
 
-	local players = getPlayer(jobname)
+	local players = MySQL.Sync.fetchAll("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
 	
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
 
-			if isOnline then
+			if isOnline and sOnline.PlayerData.job.name == jobname then
 				employees[#employees+1] = {
 				empSource = isOnline.PlayerData.citizenid,
 				grade = isOnline.PlayerData.job.grade,
 				isboss = isOnline.PlayerData.job.isboss,
 				name = '🟢 ' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
 				}
-			else
+			elseif json.decode(value.job).name == jobname then
 				employees[#employees+1] = {
 				empSource = value.citizenid,
 				grade =  json.decode(value.job).grade,
