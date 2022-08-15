@@ -1,6 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local PlayerJob = QBCore.Functions.GetPlayerData().job
 local shownBossMenu = false
+local DynamicMenuItems = {}
 
 -- UTIL
 local function CloseMenuFull()
@@ -12,6 +13,7 @@ end
 local function comma_value(amount)
     local formatted = amount
     while true do
+        local k
         formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
         if (k == 0) then
             break
@@ -19,6 +21,20 @@ local function comma_value(amount)
     end
     return formatted
 end
+
+local function AddBossMenuItem(data, id)
+    local menuID = id or (#DynamicMenuItems + 1)
+    DynamicMenuItems[menuID] = deepcopy(data)
+    return menuID
+end
+
+exports("AddBossMenuItem", AddBossMenuItem)
+
+local function RemoveBossMenuItem(id)
+    DynamicMenuItems[id] = nil
+end
+
+exports("RemoveBossMenuItem", RemoveBossMenuItem)
 
 AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then
@@ -40,50 +56,63 @@ RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
     local bossMenu = {
         {
             header = "Boss Menu - " .. string.upper(PlayerJob.label),
+            icon = "fa-solid fa-circle-info",
             isMenuHeader = true,
         },
         {
-            header = "📋 Manage Employees",
+            header = "Manage Employees",
             txt = "Check your Employees List",
+            icon = "fa-solid fa-list",
             params = {
                 event = "qb-bossmenu:client:employeelist",
             }
         },
         {
-            header = "💛 Hire Employees",
+            header = "Hire Employees",
             txt = "Hire Nearby Civilians",
+            icon = "fa-solid fa-hand-holding",
             params = {
                 event = "qb-bossmenu:client:HireMenu",
             }
         },
         {
-            header = "🗄️ Storage Access",
+            header = "Storage Access",
             txt = "Open Storage",
+            icon = "fa-solid fa-box-open",
             params = {
                 event = "qb-bossmenu:client:Stash",
             }
         },
         {
-            header = "🚪 Outfits",
+            header = "Outfits",
             txt = "See Saved Outfits",
+            icon = "fa-solid fa-shirt",
             params = {
                 event = "qb-bossmenu:client:Wardrobe",
             }
         },
         {
-            header = "💰 Money Management",
+            header = "Money Management",
             txt = "Check your Company Balance",
+            icon = "fa-solid fa-sack-dollar",
             params = {
                 event = "qb-bossmenu:client:SocietyMenu",
             }
         },
-        {
-            header = "Exit",
-            params = {
-                event = "qb-menu:closeMenu",
-            }
-        },
     }
+
+    for _, v in pairs(DynamicMenuItems) do
+        bossMenu[#bossMenu + 1] = v
+    end
+
+    bossMenu[#bossMenu + 1] = {
+        header = "Exit",
+        icon = "fa-solid fa-angle-left",
+        params = {
+            event = "qb-menu:closeMenu",
+        }
+    }
+
     exports['qb-menu']:openMenu(bossMenu)
 end)
 
@@ -92,6 +121,7 @@ RegisterNetEvent('qb-bossmenu:client:employeelist', function()
         {
             header = "Manage Employees - " .. string.upper(PlayerJob.label),
             isMenuHeader = true,
+            icon = "fa-solid fa-circle-info",
         },
     }
     QBCore.Functions.TriggerCallback('qb-bossmenu:server:GetEmployees', function(cb)
@@ -99,6 +129,7 @@ RegisterNetEvent('qb-bossmenu:client:employeelist', function()
             EmployeesMenu[#EmployeesMenu + 1] = {
                 header = v.name,
                 txt = v.grade.name,
+                icon = "fa-solid fa-circle-user",
                 params = {
                     event = "qb-bossmenu:client:ManageEmployee",
                     args = {
@@ -109,7 +140,8 @@ RegisterNetEvent('qb-bossmenu:client:employeelist', function()
             }
         end
         EmployeesMenu[#EmployeesMenu + 1] = {
-            header = "< Return",
+            header = "Return",
+            icon = "fa-solid fa-angle-left",
             params = {
                 event = "qb-bossmenu:client:OpenMenu",
             }
@@ -123,6 +155,7 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
         {
             header = "Manage " .. data.player.name .. " - " .. string.upper(PlayerJob.label),
             isMenuHeader = true,
+            icon = "fa-solid fa-circle-info"
         },
     }
     for k, v in pairs(QBCore.Shared.Jobs[data.work.name].grades) do
@@ -132,6 +165,7 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
             params = {
                 isServer = true,
                 event = "qb-bossmenu:server:GradeUpdate",
+                icon = "fa-solid fa-file-pen",
                 args = {
                     cid = data.player.empSource,
                     grade = tonumber(k),
@@ -142,6 +176,7 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
     end
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = "Fire Employee",
+        icon = "fa-solid fa-user-large-slash",
         params = {
             isServer = true,
             event = "qb-bossmenu:server:FireEmployee",
@@ -149,7 +184,8 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
         }
     }
     EmployeeMenu[#EmployeeMenu + 1] = {
-        header = "< Return",
+        header = "Return",
+        icon = "fa-solid fa-angle-left",
         params = {
             event = "qb-bossmenu:client:OpenMenu",
         }
@@ -174,6 +210,7 @@ RegisterNetEvent('qb-bossmenu:client:HireMenu', function()
         {
             header = "Hire Employees - " .. string.upper(PlayerJob.label),
             isMenuHeader = true,
+            icon = "fa-solid fa-circle-info",
         },
     }
     QBCore.Functions.TriggerCallback('qb-bossmenu:getplayers', function(players)
@@ -182,6 +219,7 @@ RegisterNetEvent('qb-bossmenu:client:HireMenu', function()
                 HireMenu[#HireMenu + 1] = {
                     header = v.name,
                     txt = "Citizen ID: " .. v.citizenid .. " - ID: " .. v.sourceplayer,
+                    icon = "fa-solid fa-user-check",
                     params = {
                         isServer = true,
                         event = "qb-bossmenu:server:HireEmployee",
@@ -191,7 +229,8 @@ RegisterNetEvent('qb-bossmenu:client:HireMenu', function()
             end
         end
         HireMenu[#HireMenu + 1] = {
-            header = "< Return",
+            header = "Return",
+            icon = "fa-solid fa-angle-left",
             params = {
                 event = "qb-bossmenu:client:OpenMenu",
             }
@@ -206,9 +245,11 @@ RegisterNetEvent('qb-bossmenu:client:SocietyMenu', function()
             {
                 header = "Balance: $" .. comma_value(cb) .. " - " .. string.upper(PlayerJob.label),
                 isMenuHeader = true,
+                icon = "fa-solid fa-circle-info",
             },
             {
-                header = "💸 Deposit",
+                header = "Deposit",
+                icon = "fa-solid fa-money-bill-transfer",
                 txt = "Deposit Money into account",
                 params = {
                     event = "qb-bossmenu:client:SocetyDeposit",
@@ -216,7 +257,8 @@ RegisterNetEvent('qb-bossmenu:client:SocietyMenu', function()
                 }
             },
             {
-                header = "💸 Withdraw",
+                header = "Withdraw",
+                icon = "fa-solid fa-money-bill-transfer",
                 txt = "Withdraw Money from account",
                 params = {
                     event = "qb-bossmenu:client:SocetyWithDraw",
@@ -224,7 +266,8 @@ RegisterNetEvent('qb-bossmenu:client:SocietyMenu', function()
                 }
             },
             {
-                header = "< Return",
+                header = "Return",
+                icon = "fa-solid fa-angle-left",
                 params = {
                     event = "qb-bossmenu:client:OpenMenu",
                 }

@@ -11,7 +11,12 @@ function AddGangMoney(account, amount)
 	end
 
 	GangAccounts[account] = GangAccounts[account] + amount
-	MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
+	MySQL.insert('INSERT INTO management_funds (job_name, amount, type) VALUES (:job_name, :amount, :type) ON DUPLICATE KEY UPDATE amount = :amount',
+		{
+			['job_name'] = account,
+			['amount'] = GangAccounts[account],
+			['type'] = 'gang'
+		})
 end
 
 function RemoveGangMoney(account, amount)
@@ -26,13 +31,13 @@ function RemoveGangMoney(account, amount)
 			isRemoved = true
 		end
 
-		MySQL.Async.execute('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
+		MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
 	end
 	return isRemoved
 end
 
 MySQL.ready(function ()
-	local gangmenu = MySQL.Sync.fetchAll('SELECT job_name,amount FROM management_funds WHERE type = "gang"', {})
+	local gangmenu = MySQL.query.await('SELECT job_name,amount FROM management_funds WHERE type = "gang"', {})
 	if not gangmenu then return end
 
 	for _,v in ipairs(gangmenu) do
@@ -76,7 +81,7 @@ RegisterNetEvent("qb-gangmenu:server:depositMoney", function(amount)
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
 
-QBCore.Functions.CreateCallback('qb-gangmenu:server:GetAccount', function(source, cb, GangName)
+QBCore.Functions.CreateCallback('qb-gangmenu:server:GetAccount', function(_, cb, GangName)
 	local gangmoney = GetGangAccount(GangName)
 	cb(gangmoney)
 end)
@@ -89,9 +94,9 @@ QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(sour
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'GetEmployees Exploiting') return end
 
 	local employees = {}
-	local players = MySQL.Sync.fetchAll("SELECT * FROM `players` WHERE `gang` LIKE '%".. gangname .."%'", {})
+	local players = MySQL.query.await("SELECT * FROM `players` WHERE `gang` LIKE '%".. gangname .."%'", {})
 	if players[1] ~= nil then
-		for key, value in pairs(players) do
+		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
 
 			if isOnline then
@@ -121,6 +126,7 @@ RegisterNetEvent('qb-gangmenu:server:GradeUpdate', function(data)
 	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid)
 
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'GradeUpdate Exploiting') return end
+	if data.grade > Player.PlayerData.gang.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot promote to this rank!", "error") return end
 
 	if Employee then
 		if Employee.Functions.SetGang(Player.PlayerData.gang.name, data.grade) then
@@ -145,6 +151,7 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 
 	if Employee then
 		if target ~= Player.PlayerData.citizenid then
+			if Employee.PlayerData.gang.grade.level > Player.PlayerData.gang.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot fire this citizen!", "error") return end
 			if Employee.Functions.SetGang("none", '0') then
 				TriggerEvent("qb-log:server:CreateLog", "gangmenu", "Gang Fire", "orange", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.gang.name .. ")", false)
 				TriggerClientEvent('QBCore:Notify', src, "Gang Member fired!", "success")
@@ -156,9 +163,11 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 			TriggerClientEvent('QBCore:Notify', src, "You can\'t kick yourself out of the gang!", "error")
 		end
 	else
-		local player = MySQL.Sync.fetchAll('SELECT * FROM players WHERE citizenid = ? LIMIT 1', {target})
+		local player = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? LIMIT 1', {target})
 		if player[1] ~= nil then
 			Employee = player[1]
+			Employee.gang = json.decode(Employee.gang)
+			if Employee.gang.grade.level > Player.PlayerData.job.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot fire this citizen!", "error") return end
 			local gang = {}
 			gang.name = "none"
 			gang.label = "No Affiliation"
@@ -168,7 +177,7 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 			gang.grade = {}
 			gang.grade.name = nil
 			gang.grade.level = 0
-			MySQL.Async.execute('UPDATE players SET gang = ? WHERE citizenid = ?', {json.encode(gang), target})
+			MySQL.update('UPDATE players SET gang = ? WHERE citizenid = ?', {json.encode(gang), target})
 			TriggerClientEvent('QBCore:Notify', src, "Gang member fired!", "success")
 			TriggerEvent("qb-log:server:CreateLog", "gangmenu", "Gang Fire", "orange", Player.PlayerData.charinfo.firstname .. " " .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. " " .. Employee.PlayerData.charinfo.lastname .. " (" .. Player.PlayerData.gang.name .. ")", false)
 		else
@@ -200,7 +209,7 @@ QBCore.Functions.CreateCallback('qb-gangmenu:getplayers', function(source, cb)
 	local players = {}
 	local PlayerPed = GetPlayerPed(src)
 	local pCoords = GetEntityCoords(PlayerPed)
-	for k, v in pairs(QBCore.Functions.GetPlayers()) do
+	for _, v in pairs(QBCore.Functions.GetPlayers()) do
 		local targetped = GetPlayerPed(v)
 		local tCoords = GetEntityCoords(targetped)
 		local dist = #(pCoords - tCoords)
