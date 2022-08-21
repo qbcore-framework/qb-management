@@ -128,7 +128,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
 
-			if isOnline and sOnline.PlayerData.job.name == jobname then
+			if isOnline and isOnline.PlayerData.job.name == jobname then
 				employees[#employees+1] = {
 				empSource = isOnline.PlayerData.citizenid,
 				grade = isOnline.PlayerData.job.grade,
