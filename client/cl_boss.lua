@@ -356,7 +356,7 @@ CreateThread(function()
                                 if #(pos - coords) <= 1.5 then
                                     nearBossmenu = true
                                     if not shownBossMenu then
-                                        exports['qb-core']:DrawText(Lang:t("menu.job_management"), 'left')
+                                        exports['qb-core']:DrawText(Lang:t("interaction.job_management"), 'left')
                                         shownBossMenu = true
                                     end
                                     if IsControlJustReleased(0, 38) then
