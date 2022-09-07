@@ -95,6 +95,9 @@ RegisterNetEvent("qb-bossmenu:server:depositMoney", function(amount)
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
+RegisterNetEvent("qb-bossmenu:server:addAccountMoney", AddMoney)
+RegisterNetEvent("qb-bossmenu:server:removeAccountMoney", RemoveMoney)
+
 QBCore.Functions.CreateCallback('qb-bossmenu:server:GetAccount', function(_, cb, jobname)
 	local result = GetAccount(jobname)
 	cb(result)

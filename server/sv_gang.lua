@@ -81,6 +81,9 @@ RegisterNetEvent("qb-gangmenu:server:depositMoney", function(amount)
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
 
+RegisterNetEvent("qb-gangmenu:server:addAccountMoney", AddGangMoney)
+RegisterNetEvent("qb-gangmenu:server:removeAccountMoney", RemoveGangMoney)
+
 QBCore.Functions.CreateCallback('qb-gangmenu:server:GetAccount', function(_, cb, GangName)
 	local gangmoney = GetGangAccount(GangName)
 	cb(gangmoney)
