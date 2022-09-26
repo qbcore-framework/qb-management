@@ -16,7 +16,7 @@ function ExploitBan(id, reason)
 end
 
 function GetAccount(account)
-	return Accounts[account] or 0
+	return Accounts[account] or false
 end
 
 function AddMoney(account, amount)
