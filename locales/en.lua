@@ -28,9 +28,7 @@ local Translations = {
         ['depositm'] = 'Deposit Money <br> Available Balance: $',
         ['withdrawm'] = 'Withdraw Money <br> Available Balance: $',
         ['submit'] = 'Confirm',
-        ['amountp'] = 'amount',
         ['amount'] = 'Amount',
-
         ['return'] = 'Return',
         ['exit'] = 'Return',
     },
@@ -68,7 +66,6 @@ local Translations = {
         ['depositm'] = 'Deposit Money <br> Available Balance: $',
         ['withdrawm'] = 'Withdraw Money <br> Available Balance: $',
         ['submit'] = 'Confirm',
-        ['amountp'] = 'amount',
         ['amount'] = 'Amount',
         ['return'] = 'Return',
         ['exit'] = 'Exit',
