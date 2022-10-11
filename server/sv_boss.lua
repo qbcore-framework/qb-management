@@ -108,7 +108,10 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 	if not Player.PlayerData.job.isboss then ExploitBan(src, 'GetEmployees Exploiting') return end
 
 	local employees = {}
-	local players = MySQL.query.await("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
+	local players = MySQL.query.await("SELECT * FROM `players` WHERE `job` LIKE '%\"name\":\"" .. jobname .. "\"%'")
+	if not players[1] then
+		players = MySQL.query.await('SELECT * FROM `players` WHERE `job` LIKE "%\'name\':\'' .. jobname .. '\'%"')
+	end
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
