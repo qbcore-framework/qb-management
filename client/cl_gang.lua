@@ -292,8 +292,8 @@ RegisterNetEvent('qb-gangmenu:client:SocietyDeposit', function(saldoattuale)
         }
     })
     if deposit then
-        if not deposit.amount then return end
-        TriggerServerEvent("qb-gangmenu:server:depositMoney", tonumber(deposit.amount))
+        if not deposit.Amount then return end
+        TriggerServerEvent("qb-gangmenu:server:depositMoney", tonumber(deposit.Amount))
     end
 end)
 
@@ -311,8 +311,8 @@ RegisterNetEvent('qb-gangmenu:client:SocietyWithdraw', function(saldoattuale)
         }
     })
     if withdraw then
-        if not withdraw.amount then return end
-        TriggerServerEvent("qb-gangmenu:server:withdrawMoney", tonumber(withdraw.amount))
+        if not withdraw.Amount then return end
+        TriggerServerEvent("qb-gangmenu:server:withdrawMoney", tonumber(withdraw.Amount))
     end
 end)
 
