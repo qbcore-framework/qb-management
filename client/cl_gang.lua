@@ -286,14 +286,14 @@ RegisterNetEvent('qb-gangmenu:client:SocietyDeposit', function(saldoattuale)
             {
                 type = 'number',
                 isRequired = true,
-                name = Lang:t("bodygang.amount"),
+                name = 'amount',
                 text = Lang:t("bodygang.amount")
             }
         }
     })
     if deposit then
-        if not deposit.Amount then return end
-        TriggerServerEvent("qb-gangmenu:server:depositMoney", tonumber(deposit.Amount))
+        if not deposit.amount then return end
+        TriggerServerEvent("qb-gangmenu:server:depositMoney", tonumber(deposit.amount))
     end
 end)
 
@@ -305,14 +305,14 @@ RegisterNetEvent('qb-gangmenu:client:SocietyWithdraw', function(saldoattuale)
             {
                 type = 'number',
                 isRequired = true,
-                name = Lang:t("bodygang.amount"),
+                name = 'amount',
                 text = Lang:t("bodygang.amount")
             }
         }
     })
     if withdraw then
-        if not withdraw.Amount then return end
-        TriggerServerEvent("qb-gangmenu:server:withdrawMoney", tonumber(withdraw.Amount))
+        if not withdraw.amount then return end
+        TriggerServerEvent("qb-gangmenu:server:withdrawMoney", tonumber(withdraw.amount))
     end
 end)
 
