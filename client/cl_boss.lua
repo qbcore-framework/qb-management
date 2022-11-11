@@ -299,6 +299,7 @@ RegisterNetEvent('qb-bossmenu:client:SocetyWithDraw', function(money)
 end)
 -- THREADS
 CreateThread(function()
+    if QBCore.Shared.QBJobsStatus then return end
     if Config.UseTarget then
         for job, zones in pairs(Config.BossMenuZones) do
             for index, data in ipairs(zones) do
