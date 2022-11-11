@@ -286,7 +286,7 @@ RegisterNetEvent('qb-gangmenu:client:SocietyDeposit', function(saldoattuale)
             {
                 type = 'number',
                 isRequired = true,
-                name = Lang:t("bodygang.amount"),
+                name = 'amount',
                 text = Lang:t("bodygang.amount")
             }
         }
@@ -305,7 +305,7 @@ RegisterNetEvent('qb-gangmenu:client:SocietyWithdraw', function(saldoattuale)
             {
                 type = 'number',
                 isRequired = true,
-                name = Lang:t("bodygang.amount"),
+                name = 'amount',
                 text = Lang:t("bodygang.amount")
             }
         }

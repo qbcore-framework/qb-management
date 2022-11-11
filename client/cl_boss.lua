@@ -285,14 +285,14 @@ RegisterNetEvent('qb-bossmenu:client:SocetyDeposit', function(money)
             {
                 type = 'number',
                 isRequired = true,
-                name = Lang:t("body.amount"),
+                name = 'amount',
                 text = Lang:t("body.amount")
             }
         }
     })
     if deposit then
-        if not deposit.Amount then return end
-        TriggerServerEvent("qb-bossmenu:server:depositMoney", tonumber(deposit.Amount))
+        if not deposit.amount then return end
+        TriggerServerEvent("qb-bossmenu:server:depositMoney", tonumber(deposit.amount))
     end
 end)
 
@@ -304,14 +304,14 @@ RegisterNetEvent('qb-bossmenu:client:SocetyWithDraw', function(money)
             {
                 type = 'number',
                 isRequired = true,
-                name = Lang:t("body.amount"),
+                name = 'amount',
                 text = Lang:t("body.amount")
             }
         }
     })
     if withdraw then
-        if not withdraw.Amount then return end
-        TriggerServerEvent("qb-bossmenu:server:withdrawMoney", tonumber(withdraw.Amount))
+        if not withdraw.amount then return end
+        TriggerServerEvent("qb-bossmenu:server:withdrawMoney", tonumber(withdraw.amount))
     end
 end)
 
