@@ -348,12 +348,12 @@ CreateThread(function()
             local nearBossmenu = false
             if PlayerJob then
                 wait = 0
-                for k, menus in pairs(Config.BossMenus) do
-                    for _, coords in ipairs(menus) do
+                for k, v in pairs(Config.BossMenuZones) do
+                    for _, v2 in pairs(v) do
                         if k == PlayerJob.name and PlayerJob.isboss then
-                            if #(pos - coords) < 5.0 then
+                            if #(pos - v2.coords) < 5.0 then
                                 inRangeBoss = true
-                                if #(pos - coords) <= 1.5 then
+                                if #(pos - v2.coords) <= 1.5 then
                                     nearBossmenu = true
                                     if not shownBossMenu then
                                         exports['qb-core']:DrawText(Lang:t("drawtext.label"), 'left')
