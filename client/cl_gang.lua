@@ -1,15 +1,14 @@
+-- Variables
 local QBCore = exports['qb-core']:GetCoreObject()
 local PlayerGang = QBCore.Functions.GetPlayerData().gang
 local shownGangMenu = false
-local DynamicMenuItems = {}
-
--- UTIL
+local GangDynamicMenuItems = {}
+-- Functions
 local function CloseMenuFullGang()
     exports['qb-menu']:closeMenu()
     exports['qb-core']:HideText()
     shownGangMenu = false
 end
-
 local function comma_valueGang(amount)
     local formatted = amount
     while true do
@@ -21,23 +20,29 @@ local function comma_valueGang(amount)
     end
     return formatted
 end
-
---//Events
+local function AddGangMenuItem(data, id)
+    local menuID = id or (#GangDynamicMenuItems + 1)
+    GangDynamicMenuItems[menuID] = deepcopy(data)
+    return menuID
+end
+exports("AddGangMenuItem", AddGangMenuItem)
+local function RemoveGangMenuItem(id)
+    GangDynamicMenuItems[id] = nil
+end
+exports("RemoveGangMenuItem", RemoveGangMenuItem)
+-- Events
 AddEventHandler('onResourceStart', function(resource)--if you restart the resource
     if resource == GetCurrentResourceName() then
         Wait(200)
         PlayerGang = QBCore.Functions.GetPlayerData().gang
     end
 end)
-
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerGang = QBCore.Functions.GetPlayerData().gang
 end)
-
 RegisterNetEvent('QBCore:Client:OnGangUpdate', function(InfoGang)
     PlayerGang = InfoGang
 end)
-
 RegisterNetEvent('qb-gangmenu:client:Stash', function()
     TriggerServerEvent("inventory:server:OpenInventory", "stash", "boss_" .. PlayerGang.name, {
         maxweight = 4000000,
@@ -45,25 +50,9 @@ RegisterNetEvent('qb-gangmenu:client:Stash', function()
     })
     TriggerEvent("inventory:client:SetCurrentStash", "boss_" .. PlayerGang.name)
 end)
-
 RegisterNetEvent('qb-gangmenu:client:Warbobe', function()
     TriggerEvent('qb-clothing:client:openOutfitMenu')
 end)
-
-local function AddGangMenuItem(data, id)
-    local menuID = id or (#DynamicMenuItems + 1)
-    DynamicMenuItems[menuID] = deepcopy(data)
-    return menuID
-end
-
-exports("AddGangMenuItem", AddGangMenuItem)
-
-local function RemoveGangMenuItem(id)
-    DynamicMenuItems[id] = nil
-end
-
-exports("RemoveGangMenuItem", RemoveGangMenuItem)
-
 RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
     shownGangMenu = true
     local gangMenu = {
@@ -114,10 +103,9 @@ RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
         },
     }
 
-    for _, v in pairs(DynamicMenuItems) do
+    for _, v in pairs(GangDynamicMenuItems) do
         gangMenu[#gangMenu + 1] = v
     end
-
     gangMenu[#gangMenu + 1] = {
         header = Lang:t("bodygang.exit"),
         icon = "fa-solid fa-angle-left",
@@ -125,10 +113,8 @@ RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
             event = "qb-menu:closeMenu",
         }
     }
-
     exports['qb-menu']:openMenu(gangMenu)
 end)
-
 RegisterNetEvent('qb-gangmenu:client:ManageGang', function()
     local GangMembersMenu = {
         {
@@ -162,7 +148,6 @@ RegisterNetEvent('qb-gangmenu:client:ManageGang', function()
         exports['qb-menu']:openMenu(GangMembersMenu)
     end, PlayerGang.name)
 end)
-
 RegisterNetEvent('qb-gangmenu:lient:ManageMember', function(data)
     local MemberMenu = {
         {
@@ -205,7 +190,6 @@ RegisterNetEvent('qb-gangmenu:lient:ManageMember', function(data)
     }
     exports['qb-menu']:openMenu(MemberMenu)
 end)
-
 RegisterNetEvent('qb-gangmenu:client:HireMembers', function()
     local HireMembersMenu = {
         {
@@ -239,7 +223,6 @@ RegisterNetEvent('qb-gangmenu:client:HireMembers', function()
         exports['qb-menu']:openMenu(HireMembersMenu)
     end)
 end)
-
 RegisterNetEvent('qb-gangmenu:client:SocietyMenu', function()
     QBCore.Functions.TriggerCallback('qb-gangmenu:server:GetAccount', function(cb)
         local SocietyMenu = {
@@ -277,7 +260,6 @@ RegisterNetEvent('qb-gangmenu:client:SocietyMenu', function()
         exports['qb-menu']:openMenu(SocietyMenu)
     end, PlayerGang.name)
 end)
-
 RegisterNetEvent('qb-gangmenu:client:SocietyDeposit', function(saldoattuale)
     local deposit = exports['qb-input']:ShowInput({
         header = Lang:t("bodygang.depositm").. saldoattuale,
@@ -296,7 +278,6 @@ RegisterNetEvent('qb-gangmenu:client:SocietyDeposit', function(saldoattuale)
         TriggerServerEvent("qb-gangmenu:server:depositMoney", tonumber(deposit.amount))
     end
 end)
-
 RegisterNetEvent('qb-gangmenu:client:SocietyWithdraw', function(saldoattuale)
     local withdraw = exports['qb-input']:ShowInput({
         header = Lang:t("bodygang.withdrawm").. saldoattuale,
@@ -315,9 +296,7 @@ RegisterNetEvent('qb-gangmenu:client:SocietyWithdraw', function(saldoattuale)
         TriggerServerEvent("qb-gangmenu:server:withdrawMoney", tonumber(withdraw.amount))
     end
 end)
-
--- MAIN THREAD
-
+-- THREADS
 CreateThread(function()
     if Config.UseTarget then
         for gang, zones in pairs(Config.GangMenuZones) do
@@ -350,12 +329,12 @@ CreateThread(function()
             local nearGangmenu = false
             if PlayerGang then
                 wait = 0
-                for k, menus in pairs(Config.GangMenus) do
-                    for _, coords in ipairs(menus) do
+                for k,v in pairs(Config.GangMenuZones) do
+                    for _,v2 in pairs(v) do
                         if k == PlayerGang.name and PlayerGang.isboss then
-                            if #(pos - coords) < 5.0 then
+                            if #(pos - v2.coords) < 5.0 then
                                 inRangeGang = true
-                                if #(pos - coords) <= 1.5 then
+                                if #(pos - v2.coords) <= 1.5 then
                                     nearGangmenu = true
                                     if not shownGangMenu then
                                         exports['qb-core']:DrawText(Lang:t("drawtextgang.label"), 'left')
