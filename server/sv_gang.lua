@@ -1,15 +1,14 @@
+-- Variables
 local QBCore = exports['qb-core']:GetCoreObject()
 local GangAccounts = {}
-
+-- Functions
 function GetGangAccount(account)
 	return GangAccounts[account] or 0
 end
-
 function AddGangMoney(account, amount)
 	if not GangAccounts[account] then
 		GangAccounts[account] = 0
 	end
-
 	GangAccounts[account] = GangAccounts[account] + amount
 	MySQL.insert('INSERT INTO management_funds (job_name, amount, type) VALUES (:job_name, :amount, :type) ON DUPLICATE KEY UPDATE amount = :amount',
 		{
@@ -18,24 +17,20 @@ function AddGangMoney(account, amount)
 			['type'] = 'gang'
 		})
 end
-
 function RemoveGangMoney(account, amount)
 	local isRemoved = false
 	if amount > 0 then
 		if not GangAccounts[account] then
 			GangAccounts[account] = 0
 		end
-
 		if GangAccounts[account] >= amount then
 			GangAccounts[account] = GangAccounts[account] - amount
 			isRemoved = true
 		end
-
 		MySQL.update('UPDATE management_funds SET amount = ? WHERE job_name = ? and type = "gang"', { GangAccounts[account], account })
 	end
 	return isRemoved
 end
-
 MySQL.ready(function ()
 	local gangmenu = MySQL.query.await('SELECT job_name,amount FROM management_funds WHERE type = "gang"', {})
 	if not gangmenu then return end
@@ -44,13 +39,11 @@ MySQL.ready(function ()
 		GangAccounts[v.job_name] = v.amount
 	end
 end)
-
+-- Events
 RegisterNetEvent("qb-gangmenu:server:withdrawMoney", function(amount)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'withdrawMoney Exploiting') return end
-
 	local gang = Player.PlayerData.gang.name
 	if RemoveGangMoney(gang, amount) then
 		Player.Functions.AddMoney("cash", amount, 'Gang menu withdraw')
@@ -59,16 +52,12 @@ RegisterNetEvent("qb-gangmenu:server:withdrawMoney", function(amount)
 	else
 		TriggerClientEvent('QBCore:Notify', src, "You dont have enough money in the account!", "error")
 	end
-
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
-
 RegisterNetEvent("qb-gangmenu:server:depositMoney", function(amount)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'depositMoney Exploiting') return end
-
 	if Player.Functions.RemoveMoney("cash", amount) then
 		local gang = Player.PlayerData.gang.name
 		AddGangMoney(gang, amount)
@@ -77,57 +66,19 @@ RegisterNetEvent("qb-gangmenu:server:depositMoney", function(amount)
 	else
 		TriggerClientEvent('QBCore:Notify', src, "You dont have enough money to add!", "error")
 	end
-
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
-
 QBCore.Functions.CreateCallback('qb-gangmenu:server:GetAccount', function(_, cb, GangName)
 	local gangmoney = GetGangAccount(GangName)
 	cb(gangmoney)
 end)
-
--- Get Employees
-QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(source, cb, gangname)
-	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
-
-	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'GetEmployees Exploiting') return end
-
-	local employees = {}
-	local players = MySQL.query.await("SELECT * FROM `players` WHERE `gang` LIKE '%".. gangname .."%'", {})
-	if players[1] ~= nil then
-		for _, value in pairs(players) do
-			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
-
-			if isOnline then
-				employees[#employees+1] = {
-				empSource = isOnline.PlayerData.citizenid,
-				grade = isOnline.PlayerData.gang.grade,
-				isboss = isOnline.PlayerData.gang.isboss,
-				name = '🟢' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
-				}
-			else
-				employees[#employees+1] = {
-				empSource = value.citizenid,
-				grade =  json.decode(value.gang).grade,
-				isboss = json.decode(value.gang).isboss,
-				name = '❌' ..  json.decode(value.charinfo).firstname .. ' ' .. json.decode(value.charinfo).lastname
-				}
-			end
-		end
-	end
-	cb(employees)
-end)
-
 -- Grade Change
 RegisterNetEvent('qb-gangmenu:server:GradeUpdate', function(data)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid)
-
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'GradeUpdate Exploiting') return end
 	if data.grade > Player.PlayerData.gang.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot promote to this rank!", "error") return end
-
 	if Employee then
 		if Employee.Functions.SetGang(Player.PlayerData.gang.name, data.grade) then
 			TriggerClientEvent('QBCore:Notify', src, "Successfully promoted!", "success")
@@ -140,15 +91,12 @@ RegisterNetEvent('qb-gangmenu:server:GradeUpdate', function(data)
 	end
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
-
 -- Fire Member
 RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	local Employee = QBCore.Functions.GetPlayerByCitizenId(target)
-
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'FireEmployee Exploiting') return end
-
 	if Employee then
 		if target ~= Player.PlayerData.citizenid then
 			if Employee.PlayerData.gang.grade.level > Player.PlayerData.gang.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot fire this citizen!", "error") return end
@@ -186,15 +134,12 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 	end
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
-
 -- Recruit Player
 RegisterNetEvent('qb-gangmenu:server:HireMember', function(recruit)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	local Target = QBCore.Functions.GetPlayer(recruit)
-
 	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'HireEmployee Exploiting') return end
-
 	if Target and Target.Functions.SetGang(Player.PlayerData.gang.name, 0) then
 		TriggerClientEvent('QBCore:Notify', src, "You hired " .. (Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname) .. " come " .. Player.PlayerData.gang.label .. "", "success")
 		TriggerClientEvent('QBCore:Notify', Target.PlayerData.source , "You have been hired as " .. Player.PlayerData.gang.label .. "", "success")
@@ -202,7 +147,36 @@ RegisterNetEvent('qb-gangmenu:server:HireMember', function(recruit)
 	end
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
-
+-- Callbacks
+-- Get Employees
+QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(source, cb, gangname)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if not Player.PlayerData.gang.isboss then ExploitBan(src, 'GetEmployees Exploiting') return end
+	local employees = {}
+	local players = MySQL.query.await("SELECT * FROM `players` WHERE `gang` LIKE '%".. gangname .."%'", {})
+	if players[1] ~= nil then
+		for _, value in pairs(players) do
+			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
+			if isOnline then
+				employees[#employees+1] = {
+				empSource = isOnline.PlayerData.citizenid,
+				grade = isOnline.PlayerData.gang.grade,
+				isboss = isOnline.PlayerData.gang.isboss,
+				name = '🟢' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
+				}
+			else
+				employees[#employees+1] = {
+				empSource = value.citizenid,
+				grade =  json.decode(value.gang).grade,
+				isboss = json.decode(value.gang).isboss,
+				name = '❌' ..  json.decode(value.charinfo).firstname .. ' ' .. json.decode(value.charinfo).lastname
+				}
+			end
+		end
+	end
+	cb(employees)
+end)
 -- Get closest player sv
 QBCore.Functions.CreateCallback('qb-gangmenu:getplayers', function(source, cb)
 	local src = source
