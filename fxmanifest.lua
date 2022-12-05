@@ -4,6 +4,12 @@ game 'gta5'
 description 'qb-bossmenu'
 version '2.0.0'
 
+shared_scripts {
+    '@qb-core/shared/locale.lua',
+    'locales/en.lua',
+    'locales/*.lua',
+}
+
 client_scripts {
     'client/*.lua'
 }
