@@ -52,6 +52,10 @@ MySQL.ready(function ()
 	end
 end)
 -- Events
+RegisterNetEvent('QBCore:Server:UpdateObject', function()
+	if source ~= '' then return false end
+	QBCore = exports['qb-core']:GetCoreObject()
+end)
 RegisterNetEvent("qb-bossmenu:server:withdrawMoney", function(amount)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
