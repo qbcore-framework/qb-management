@@ -68,46 +68,46 @@ RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
     shownGangMenu = true
     local gangMenu = {
         {
-            header = "Gang Management  - " .. string.upper(PlayerGang.label),
+            header = Lang:t("headersgang.bsm").. string.upper(PlayerGang.label),
             icon = "fa-solid fa-circle-info",
             isMenuHeader = true,
         },
         {
-            header = "Manage Gang Members",
+            header = Lang:t("bodygang.manage"),
+            txt = Lang:t("bodygang.managed"),
             icon = "fa-solid fa-list",
-            txt = "Recruit or Fire Gang Members",
             params = {
                 event = "qb-gangmenu:client:ManageGang",
             }
         },
         {
-            header = "Recruit Members",
+            header = Lang:t("bodygang.hire"),
+            txt = Lang:t("bodygang.hired"),
             icon = "fa-solid fa-hand-holding",
-            txt = "Hire Gang Members",
             params = {
                 event = "qb-gangmenu:client:HireMembers",
             }
         },
         {
-            header = "Storage Access",
+            header = Lang:t("bodygang.storage"),
+            txt = Lang:t("bodygang.storaged"),
             icon = "fa-solid fa-box-open",
-            txt = "Open Gang Stash",
             params = {
                 event = "qb-gangmenu:client:Stash",
             }
         },
         {
-            header = "Outfits",
-            txt = "Change Clothes",
+            header = Lang:t("bodygang.outfits"),
+            txt = Lang:t("bodygang.outfitsd"),
             icon = "fa-solid fa-shirt",
             params = {
                 event = "qb-gangmenu:client:Warbobe",
             }
         },
         {
-            header = "Money Management",
+            header = Lang:t("bodygang.money"),
+            txt = Lang:t("bodygang.moneyd"),
             icon = "fa-solid fa-sack-dollar",
-            txt = "Check your Gang Balance",
             params = {
                 event = "qb-gangmenu:client:SocietyMenu",
             }
@@ -119,7 +119,7 @@ RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
     end
 
     gangMenu[#gangMenu + 1] = {
-        header = "Exit",
+        header = Lang:t("bodygang.exit"),
         icon = "fa-solid fa-angle-left",
         params = {
             event = "qb-menu:closeMenu",
@@ -132,7 +132,7 @@ end)
 RegisterNetEvent('qb-gangmenu:client:ManageGang', function()
     local GangMembersMenu = {
         {
-            header = "Manage Gang Members - " .. string.upper(PlayerGang.label),
+            header = Lang:t("bodygang.mempl").. string.upper(PlayerGang.label),
             icon = "fa-solid fa-circle-info",
             isMenuHeader = true,
         },
@@ -153,7 +153,7 @@ RegisterNetEvent('qb-gangmenu:client:ManageGang', function()
             }
         end
         GangMembersMenu[#GangMembersMenu + 1] = {
-            header = "Return",
+            header = Lang:t("bodygang.return"),
             icon = "fa-solid fa-angle-left",
             params = {
                 event = "qb-gangmenu:client:OpenMenu",
@@ -166,7 +166,7 @@ end)
 RegisterNetEvent('qb-gangmenu:lient:ManageMember', function(data)
     local MemberMenu = {
         {
-            header = "Manage " .. data.player.name .. " - " .. string.upper(PlayerGang.label),
+            header = Lang:t("bodygang.mngpl").. data.player.name .. " - " .. string.upper(PlayerGang.label),
             isMenuHeader = true,
             icon = "fa-solid fa-circle-info",
         },
@@ -174,7 +174,7 @@ RegisterNetEvent('qb-gangmenu:lient:ManageMember', function(data)
     for k, v in pairs(QBCore.Shared.Gangs[data.work.name].grades) do
         MemberMenu[#MemberMenu + 1] = {
             header = v.name,
-            txt = "Grade: " .. k,
+            txt = Lang:t("bodygang.grade") .. k,
             params = {
                 isServer = true,
                 event = "qb-gangmenu:server:GradeUpdate",
@@ -188,7 +188,7 @@ RegisterNetEvent('qb-gangmenu:lient:ManageMember', function(data)
         }
     end
     MemberMenu[#MemberMenu + 1] = {
-        header = "Fire",
+        header = Lang:t("bodygang.fireemp"),
         icon = "fa-solid fa-user-large-slash",
         params = {
             isServer = true,
@@ -197,7 +197,7 @@ RegisterNetEvent('qb-gangmenu:lient:ManageMember', function(data)
         }
     }
     MemberMenu[#MemberMenu + 1] = {
-        header = "Return",
+        header = Lang:t("bodygang.return"),
         icon = "fa-solid fa-angle-left",
         params = {
             event = "qb-gangmenu:client:ManageGang",
@@ -209,7 +209,7 @@ end)
 RegisterNetEvent('qb-gangmenu:client:HireMembers', function()
     local HireMembersMenu = {
         {
-            header = "Hire Gang Members - " .. string.upper(PlayerGang.label),
+            header = Lang:t("bodygang.hireemp") .. string.upper(PlayerGang.label),
             isMenuHeader = true,
             icon = "fa-solid fa-circle-info",
         },
@@ -219,7 +219,7 @@ RegisterNetEvent('qb-gangmenu:client:HireMembers', function()
             if v and v ~= PlayerId() then
                 HireMembersMenu[#HireMembersMenu + 1] = {
                     header = v.name,
-                    txt = "Citizen ID: " .. v.citizenid .. " - ID: " .. v.sourceplayer,
+                    txt = Lang:t("bodygang.cid") .. v.citizenid .. " - ID: " .. v.sourceplayer,
                     icon = "fa-solid fa-user-check",
                     params = {
                         isServer = true,
@@ -230,7 +230,7 @@ RegisterNetEvent('qb-gangmenu:client:HireMembers', function()
             end
         end
         HireMembersMenu[#HireMembersMenu + 1] = {
-            header = "Return",
+            header = Lang:t("bodygang.return"),
             icon = "fa-solid fa-angle-left",
             params = {
                 event = "qb-gangmenu:client:OpenMenu",
@@ -244,30 +244,30 @@ RegisterNetEvent('qb-gangmenu:client:SocietyMenu', function()
     QBCore.Functions.TriggerCallback('qb-gangmenu:server:GetAccount', function(cb)
         local SocietyMenu = {
             {
-                header = "Balance: $" .. comma_valueGang(cb) .. " - " .. string.upper(PlayerGang.label),
+                header =  Lang:t("bodygang.balance").. comma_valueGang(cb) .. " - " .. string.upper(PlayerGang.label),
                 isMenuHeader = true,
                 icon = "fa-solid fa-circle-info",
             },
             {
-                header = "Deposit",
+                header = Lang:t("bodygang.deposit"),
                 icon = "fa-solid fa-money-bill-transfer",
-                txt = "Deposit Money",
+                txt = Lang:t("bodygang.depositd"),
                 params = {
                     event = "qb-gangmenu:client:SocietyDeposit",
                     args = comma_valueGang(cb)
                 }
             },
             {
-                header = "Withdraw",
+                header = Lang:t("bodygang.withdraw"),
                 icon = "fa-solid fa-money-bill-transfer",
-                txt = "Withdraw Money",
+                txt = Lang:t("bodygang.withdrawd"),
                 params = {
                     event = "qb-gangmenu:client:SocietyWithdraw",
                     args = comma_valueGang(cb)
                 }
             },
             {
-                header = "Return",
+                header = Lang:t("bodygang.return"),
                 icon = "fa-solid fa-angle-left",
                 params = {
                     event = "qb-gangmenu:client:OpenMenu",
@@ -280,14 +280,14 @@ end)
 
 RegisterNetEvent('qb-gangmenu:client:SocietyDeposit', function(saldoattuale)
     local deposit = exports['qb-input']:ShowInput({
-        header = "Deposit Money <br> Available Balance: $" .. saldoattuale,
-        submitText = "Confirm",
+        header = Lang:t("bodygang.depositm").. saldoattuale,
+        submitText = Lang:t("bodygang.submit"),
         inputs = {
             {
                 type = 'number',
                 isRequired = true,
                 name = 'amount',
-                text = 'Amount'
+                text = Lang:t("bodygang.amount")
             }
         }
     })
@@ -299,14 +299,14 @@ end)
 
 RegisterNetEvent('qb-gangmenu:client:SocietyWithdraw', function(saldoattuale)
     local withdraw = exports['qb-input']:ShowInput({
-        header = "Withdraw Money <br> Available Balance: $" .. saldoattuale,
-        submitText = "Confirm",
+        header = Lang:t("bodygang.withdrawm").. saldoattuale,
+        submitText = Lang:t("bodygang.submit"),
         inputs = {
             {
                 type = 'number',
                 isRequired = true,
                 name = 'amount',
-                text = '$'
+                text = Lang:t("bodygang.amount")
             }
         }
     })
@@ -334,7 +334,7 @@ CreateThread(function()
                             type = "client",
                             event = "qb-gangmenu:client:OpenMenu",
                             icon = "fas fa-sign-in-alt",
-                            label = "Gang Menu",
+                            label = Lang:t("targetgang.label"),
                             canInteract = function() return gang == PlayerGang.name and PlayerGang.isboss end,
                         },
                     },
@@ -358,7 +358,7 @@ CreateThread(function()
                                 if #(pos - coords) <= 1.5 then
                                     nearGangmenu = true
                                     if not shownGangMenu then
-                                        exports['qb-core']:DrawText('[E] Open Gang Management', 'left')
+                                        exports['qb-core']:DrawText(Lang:t("drawtextgang.label"), 'left')
                                     end
 
                                     if IsControlJustReleased(0, 38) then

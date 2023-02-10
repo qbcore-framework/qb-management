@@ -50,7 +50,7 @@ Config.GangMenus = {
         vector3(0, 0, 0),
     },
     ['ballas'] = {
-        vector3(0,0, 0),
+        vector3(0, 0, 0),
     },
     ['vagos'] = {
         vector3(0, 0, 0),
