@@ -41,7 +41,7 @@ local Translations = {
         ['bsm'] = 'Gerir Gang  - ',
     },
     bodygang = {
-       ['manage'] = 'Gerir Membros do Gang',
+    	['manage'] = 'Gerir Membros do Gang',
 	['managed'] = 'Recrutar ou Despedir Membros do Gang',
 	['hire'] = 'Recrutar Membros',
 	['hired'] = 'Contratar Membros do Gang',
