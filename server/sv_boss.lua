@@ -77,6 +77,19 @@ RegisterNetEvent("qb-bossmenu:server:withdrawMoney", function(amount)
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
+RegisterNetEvent("qb-bossmenu:server:removeAccountMoney", function(account, amount)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+
+	if RemoveMoney(account, amount) then
+		Player.Functions.AddMoney("cash", amount, 'Boss menu withdraw')
+		TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Payment', "blue", Player.PlayerData.name.. "Paid $" .. amount .. ' (' .. account .. ')', false)
+		TriggerClientEvent('QBCore:Notify', src, "Your Soceity has paid: $" ..amount, "success")
+	else
+		TriggerClientEvent('QBCore:Notify', src, "Your society dont have enough money in the account!", "error")
+	end
+end)
+
 RegisterNetEvent("qb-bossmenu:server:depositMoney", function(amount)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
@@ -108,24 +121,26 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 	if not Player.PlayerData.job.isboss then ExploitBan(src, 'GetEmployees Exploiting') return end
 
 	local employees = {}
+
 	local players = MySQL.query.await("SELECT * FROM `players` WHERE `job` LIKE '%".. jobname .."%'", {})
+	
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
 
-			if isOnline then
+			if isOnline and isOnline.PlayerData.job.name == jobname then
 				employees[#employees+1] = {
 				empSource = isOnline.PlayerData.citizenid,
 				grade = isOnline.PlayerData.job.grade,
 				isboss = isOnline.PlayerData.job.isboss,
 				name = '🟢 ' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
 				}
-			else
+			elseif value.job.name == jobname then
 				employees[#employees+1] = {
 				empSource = value.citizenid,
-				grade =  json.decode(value.job).grade,
-				isboss = json.decode(value.job).isboss,
-				name = '❌ ' ..  json.decode(value.charinfo).firstname .. ' ' .. json.decode(value.charinfo).lastname
+				grade =  value.job.grade,
+				isboss = value.job.isboss,
+				name = '❌ ' ..  value.charinfo.firstname .. ' ' .. value.charinfo.lastname
 				}
 			end
 		end
