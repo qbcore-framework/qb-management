@@ -299,7 +299,7 @@ end)
 RegisterNetEvent('qb-bossmenu:client:SocetyWithDraw', function(money)
     local withdraw = exports['qb-input']:ShowInput({
         header = Lang:t("body.withdrawm").. money,
-        submitText = "Confirm",
+        submitText = Lang:t("body.submit"),
         inputs = {
             {
                 type = 'number',
