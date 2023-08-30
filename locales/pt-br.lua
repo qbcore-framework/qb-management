@@ -1,0 +1,83 @@
+local Translations = {
+    headers = {
+        ['bsm'] = 'Menu de Chefe - ',
+    },
+    body = {
+        ['manage'] = 'Gerenciar Funcionários',
+        ['managed'] = 'Ver Lista de Funcionários',
+        ['hire'] = 'Contratar Funcionários',
+        ['hired'] = 'Contratar Civis Próximos',
+        ['storage'] = 'Acesso ao Armazenamento',
+        ['storaged'] = 'Abrir Armazenamento',
+        ['outfits'] = 'Roupas',
+        ['outfitsd'] = 'Ver Roupas Salvas',
+        ['money'] = 'Gerenciamento de Dinheiro',
+        ['moneyd'] = 'Ver Saldo da Empresa',
+        ['mempl'] = 'Gerenciar Funcionários - ',
+        ['mngpl'] = 'Gerenciar ',
+        ['grade'] = 'Cargo: ',
+        ['fireemp'] = 'Demitir Funcionário',
+        ['hireemp'] = 'Contratar Funcionários - ',
+        ['cid'] = 'ID do Cidadão: ',
+        ['balance'] = 'Saldo: $',
+        ['deposit'] = 'Depositar',
+        ['depositd'] = 'Depositar Dinheiro na Conta',
+        ['withdraw'] = 'Sacar',
+        ['withdrawd'] = 'Sacar Dinheiro da Conta',
+        ['depositm'] = 'Depositar Dinheiro <br> Saldo Disponível: $',
+        ['withdrawm'] = 'Sacar Dinheiro <br> Saldo Disponível: $',
+        ['submit'] = 'Confirmar',
+        ['amount'] = 'Quantidade',
+        ['return'] = 'Voltar',
+        ['exit'] = 'Sair',
+    },
+    drawtext = {
+        ['label'] = '[E] Abrir Gerenciamento de Empregos',
+    },
+    target = {
+        ['label'] = 'Menu de Chefe',
+    },
+    headersgang = {
+        ['bsm'] = 'Gerenciamento de Gangue  - ',
+    },
+    bodygang = {
+        ['manage'] = 'Gerenciar Membros da Gangue',
+        ['managed'] = 'Recrutar ou Demitir Membros da Gangue',
+        ['hire'] = 'Recrutar Membros',
+        ['hired'] = 'Contratar Membros da Gangue',
+        ['storage'] = 'Acesso ao Armazenamento',
+        ['storaged'] = 'Abrir Esconderijo da Gangue',
+        ['outfits'] = 'Roupas',
+        ['outfitsd'] = 'Trocar de Roupas',
+        ['money'] = 'Gerenciamento de Dinheiro',
+        ['moneyd'] = 'Ver Saldo da Gangue',
+        ['mempl'] = 'Gerenciar Membros da Gangue - ',
+        ['mngpl'] = 'Gerenciar ',
+        ['grade'] = 'Cargo: ',
+        ['fireemp'] = 'Demitir',
+        ['hireemp'] = 'Contratar Membros da Gangue - ',
+        ['cid'] = 'ID do Cidadão: ',
+        ['balance'] = 'Saldo: $',
+        ['deposit'] = 'Depositar',
+        ['depositd'] = 'Depositar Dinheiro na Conta',
+        ['withdraw'] = 'Sacar',
+        ['withdrawd'] = 'Sacar Dinheiro da Conta',
+        ['depositm'] = 'Depositar Dinheiro <br> Saldo Disponível: $',
+        ['withdrawm'] = 'Sacar Dinheiro <br> Saldo Disponível: $',
+        ['submit'] = 'Confirmar',
+        ['amount'] = 'Quantidade',
+        ['return'] = 'Voltar',
+        ['exit'] = 'Sair',
+    },
+    drawtextgang = {
+        ['label'] = '[E] Abrir Gerenciamento de Gangue',
+    },
+    targetgang = {
+        ['label'] = 'Menu de Gangue',
+    }
+}
+
+Lang = Lang or Locale:new({
+    phrases = Translations,
+    warnOnMissing = true
+})
