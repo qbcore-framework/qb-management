@@ -359,6 +359,7 @@ CreateThread(function()
                                     nearGangmenu = true
                                     if not shownGangMenu then
                                         exports['qb-core']:DrawText(Lang:t("drawtextgang.label"), 'left')
+                                        shownGangMenu = true
                                     end
 
                                     if IsControlJustReleased(0, 38) then
