@@ -167,7 +167,7 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 		if player[1] ~= nil then
 			Employee = player[1]
 			Employee.gang = json.decode(Employee.gang)
-			if Employee.gang.grade.level > Player.PlayerData.job.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot fire this citizen!", "error") return end
+			if Employee.PlayerData.gang.grade.level > Player.PlayerData.gang.grade.level then TriggerClientEvent('QBCore:Notify', src, "You cannot fire this citizen!", "error") return end
 			local gang = {}
 			gang.name = "none"
 			gang.label = "No Affiliation"
