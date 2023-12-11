@@ -26,7 +26,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 
 	local employees = {}
 
-	local players = MySQL.query.await('SELECT citizenid,job,charinfo FROM `players` WHERE JSON_EXTRACT(job, "$.name") = "'..jobname.. '"', {})
+	local players = MySQL.query.await('SELECT citizenid,job,charinfo FROM `players` WHERE JSON_EXTRACT(job, "$.name") = ?', {jobname})
 
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
