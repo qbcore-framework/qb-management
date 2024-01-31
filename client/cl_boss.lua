@@ -3,6 +3,8 @@ local PlayerJob = QBCore.Functions.GetPlayerData().job
 local shownBossMenu = false
 local DynamicMenuItems = {}
 
+
+
 -- UTIL
 local function CloseMenuFull()
     exports['qb-menu']:closeMenu()
@@ -133,7 +135,7 @@ end)
 RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
     local EmployeeMenu = {
         {
-            header = Lang:t('body.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerJob.label),
+            header = Lang:t('body.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerJob.label) .. ' (' .. (not not data.player.onduty and 'on duty' or 'off duty') .. ')',
             isMenuHeader = true,
             icon = 'fa-solid fa-circle-info'
         },
@@ -154,6 +156,17 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
             }
         }
     end
+
+    EmployeeMenu[#EmployeeMenu + 1] = {
+        header = Lang:t('body.dutyemp'),
+        icon = 'fa-solid fa-user-large-slash',
+        params = {
+            isServer = true,
+            event = 'qb-bossmenu:server:toggleEmployeeDuty',
+            args = data.player.empSource
+        }
+    }
+
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = Lang:t('body.fireemp'),
         icon = 'fa-solid fa-user-large-slash',
@@ -163,6 +176,8 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
             args = data.player.empSource
         }
     }
+
+
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = Lang:t('body.return'),
         icon = 'fa-solid fa-angle-left',
