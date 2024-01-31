@@ -1,306 +1,216 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local PlayerJob = QBCore.Functions.GetPlayerData().job
-local shownBossMenu = false
-local DynamicMenuItems = {}
 
-
-
--- UTIL
-local function CloseMenuFull()
-    exports['qb-menu']:closeMenu()
-    exports['qb-core']:HideText()
-    shownBossMenu = false
+function ExploitBan(id, reason)
+	MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', {
+		GetPlayerName(id),
+		QBCore.Functions.GetIdentifier(id, 'license'),
+		QBCore.Functions.GetIdentifier(id, 'discord'),
+		QBCore.Functions.GetIdentifier(id, 'ip'),
+		reason,
+		2147483647,
+		'qb-management'
+	})
+	TriggerEvent('qb-log:server:CreateLog', 'bans', 'Player Banned', 'red', string.format('%s was banned by %s for %s', GetPlayerName(id), 'qb-management', reason), true)
+	DropPlayer(id, 'You were permanently banned by the server for: Exploiting')
 end
 
-local function AddBossMenuItem(data, id)
-    local menuID = id or (#DynamicMenuItems + 1)
-    DynamicMenuItems[menuID] = deepcopy(data)
-    return menuID
-end
+-- Get Employees
+QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(source, cb, jobname)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
 
-exports('AddBossMenuItem', AddBossMenuItem)
+	if not Player.PlayerData.job.isboss then
+		ExploitBan(src, 'GetEmployees Exploiting')
+		return
+	end
 
-local function RemoveBossMenuItem(id)
-    DynamicMenuItems[id] = nil
-end
+	local employees = {}
 
-exports('RemoveBossMenuItem', RemoveBossMenuItem)
+	local players = MySQL.query.await("SELECT * FROM `players` WHERE `job` LIKE '%" .. jobname .. "%'", {})
 
-AddEventHandler('onResourceStart', function(resource)
-    if resource == GetCurrentResourceName() then
-        PlayerJob = QBCore.Functions.GetPlayerData().job
-    end
+	if players[1] ~= nil then
+		for _, value in pairs(players) do
+			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
+
+			if isOnline and isOnline.PlayerData.job.name == jobname then
+				employees[#employees + 1] = {
+					empSource = isOnline.PlayerData.citizenid,
+					grade = isOnline.PlayerData.job.grade,
+					isboss = isOnline.PlayerData.job.isboss,
+					onduty = isOnline.PlayerData.job.onduty,
+					name = '🟢 ' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
+				}
+			elseif value.job.name == jobname then
+				employees[#employees + 1] = {
+					empSource = value.citizenid,
+					grade = value.job.grade,
+					isboss = value.job.isboss,
+					onduty = false,
+					name = '❌ ' .. value.charinfo.firstname .. ' ' .. value.charinfo.lastname
+				}
+			end
+		end
+		table.sort(employees, function(a, b)
+			return a.grade.level > b.grade.level
+		end)
+	end
+	cb(employees)
 end)
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    PlayerJob = QBCore.Functions.GetPlayerData().job
+-- Grade Change
+RegisterNetEvent('qb-bossmenu:server:GradeUpdate', function(data)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid)
+
+	if not Player.PlayerData.job.isboss then
+		ExploitBan(src, 'GradeUpdate Exploiting')
+		return
+	end
+	if data.grade > Player.PlayerData.job.grade.level then
+		TriggerClientEvent('QBCore:Notify', src, 'You cannot promote to this rank!', 'error')
+		return
+	end
+
+	if Employee then
+		if Employee.Functions.SetJob(Player.PlayerData.job.name, data.grade) then
+			TriggerClientEvent('QBCore:Notify', src, 'Sucessfulluy promoted!', 'success')
+			TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been promoted to' .. data.gradename .. '.', 'success')
+		else
+			TriggerClientEvent('QBCore:Notify', src, 'Promotion grade does not exist.', 'error')
+		end
+	else
+		TriggerClientEvent('QBCore:Notify', src, 'Civilian not in city.', 'error')
+	end
+	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    PlayerJob = JobInfo
+-- Fire Employee
+RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	local Employee = QBCore.Functions.GetPlayerByCitizenId(target)
+
+	if not Player.PlayerData.job.isboss then
+		ExploitBan(src, 'FireEmployee Exploiting')
+		return
+	end
+
+	if Employee then
+		if target ~= Player.PlayerData.citizenid then
+			if Employee.PlayerData.job.grade.level > Player.PlayerData.job.grade.level then
+				TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
+				return
+			end
+			if Employee.Functions.SetJob('unemployed', '0') then
+				TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Job Fire', 'red', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.job.name .. ')', false)
+				TriggerClientEvent('QBCore:Notify', src, 'Employee fired!', 'success')
+				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been fired! Good luck.', 'error')
+			else
+				TriggerClientEvent('QBCore:Notify', src, 'Error..', 'error')
+			end
+		else
+			TriggerClientEvent('QBCore:Notify', src, 'You can\'t fire yourself', 'error')
+		end
+	else
+		local player = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { target })
+		if player[1] ~= nil then
+			Employee = player[1]
+			Employee.job = json.decode(Employee.job)
+			if Employee.job.grade.level > Player.PlayerData.job.grade.level then
+				TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
+				return
+			end
+			local job = {}
+			job.name = 'unemployed'
+			job.label = 'Unemployed'
+			job.payment = QBCore.Shared.Jobs[job.name].grades['0'].payment or 500
+			job.onduty = true
+			job.isboss = false
+			job.grade = {}
+			job.grade.name = nil
+			job.grade.level = 0
+			MySQL.update('UPDATE players SET job = ? WHERE citizenid = ?', { json.encode(job), target })
+			TriggerClientEvent('QBCore:Notify', src, 'Employee fired!', 'success')
+			TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Job Fire', 'red', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.job.name .. ')', false)
+		else
+			TriggerClientEvent('QBCore:Notify', src, 'Civilian not in city.', 'error')
+		end
+	end
+	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
-RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
-    if not PlayerJob.name or not PlayerJob.isboss then return end
+-- Toggle Duty
+RegisterNetEvent('qb-bossmenu:server:toggleEmployeeDuty', function(target)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	local Target = QBCore.Functions.GetPlayerByCitizenId(target)
 
-    local bossMenu = {
-        {
-            header = Lang:t('headers.bsm') .. string.upper(PlayerJob.label),
-            icon = 'fa-solid fa-circle-info',
-            isMenuHeader = true,
-        },
-        {
-            header = Lang:t('body.manage'),
-            txt = Lang:t('body.managed'),
-            icon = 'fa-solid fa-list',
-            params = {
-                event = 'qb-bossmenu:client:employeelist',
-            }
-        },
-        {
-            header = Lang:t('body.hire'),
-            txt = Lang:t('body.hired'),
-            icon = 'fa-solid fa-hand-holding',
-            params = {
-                event = 'qb-bossmenu:client:HireMenu',
-            }
-        },
-        {
-            header = Lang:t('body.storage'),
-            txt = Lang:t('body.storaged'),
-            icon = 'fa-solid fa-box-open',
-            params = {
-                event = 'qb-bossmenu:client:Stash',
-            }
-        },
-        {
-            header = Lang:t('body.outfits'),
-            txt = Lang:t('body.outfitsd'),
-            icon = 'fa-solid fa-shirt',
-            params = {
-                event = 'qb-bossmenu:client:Wardrobe',
-            }
-        }
-    }
+	if not Player.PlayerData.job.isboss then
+		ExploitBan(src, 'HireEmployee Exploiting')
+		return
+	end
 
-    for _, v in pairs(DynamicMenuItems) do
-        bossMenu[#bossMenu + 1] = v
-    end
+	if Target then
+		Target.Functions.SetJobDuty(not Target.PlayerData.job.onduty)
 
-    bossMenu[#bossMenu + 1] = {
-        header = Lang:t('body.exit'),
-        icon = 'fa-solid fa-angle-left',
-        params = {
-            event = 'qb-menu:closeMenu',
-        }
-    }
+		Wait(5000) -- Give time for the client to update the duty status
 
-    exports['qb-menu']:openMenu(bossMenu)
+		if Target.PlayerData.job.onduty then
+			TriggerClientEvent('QBCore:Notify', src, 'You toggled on duty!', 'info')
+			TriggerClientEvent('QBCore:Notify', Target.PlayerData.source, 'You are now on duty!', 'info')
+		else
+			TriggerClientEvent('QBCore:Notify', src, 'You toggled off duty!', 'info')
+			TriggerClientEvent('QBCore:Notify', Target.PlayerData.source, 'You are now off duty!', 'info')
+		end	
+	end
+
+	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
-RegisterNetEvent('qb-bossmenu:client:employeelist', function()
-    local EmployeesMenu = {
-        {
-            header = Lang:t('body.mempl') .. string.upper(PlayerJob.label),
-            isMenuHeader = true,
-            icon = 'fa-solid fa-circle-info',
-        },
-    }
-    QBCore.Functions.TriggerCallback('qb-bossmenu:server:GetEmployees', function(cb)
-        for _, v in pairs(cb) do
-            EmployeesMenu[#EmployeesMenu + 1] = {
-                header = v.name,
-                txt = v.grade.name,
-                icon = 'fa-solid fa-circle-user',
-                params = {
-                    event = 'qb-bossmenu:client:ManageEmployee',
-                    args = {
-                        player = v,
-                        work = PlayerJob
-                    }
-                }
-            }
-        end
-        EmployeesMenu[#EmployeesMenu + 1] = {
-            header = Lang:t('body.return'),
-            icon = 'fa-solid fa-angle-left',
-            params = {
-                event = 'qb-bossmenu:client:OpenMenu',
-            }
-        }
-        exports['qb-menu']:openMenu(EmployeesMenu)
-    end, PlayerJob.name)
+-- Recruit Player
+RegisterNetEvent('qb-bossmenu:server:HireEmployee', function(recruit)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	local Target = QBCore.Functions.GetPlayer(recruit)
+
+	if not Player.PlayerData.job.isboss then
+		ExploitBan(src, 'HireEmployee Exploiting')
+		return
+	end
+
+	if Target and Target.Functions.SetJob(Player.PlayerData.job.name, 0) then
+		TriggerClientEvent('QBCore:Notify', src, 'You hired ' .. (Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname) .. ' come ' .. Player.PlayerData.job.label .. '', 'success')
+		TriggerClientEvent('QBCore:Notify', Target.PlayerData.source, 'You were hired as ' .. Player.PlayerData.job.label .. '', 'success')
+		TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Recruit', 'lightgreen', (Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname) .. ' successfully recruited ' .. (Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname) .. ' (' .. Player.PlayerData.job.name .. ')', false)
+	end
+	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
-RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
-    local EmployeeMenu = {
-        {
-            header = Lang:t('body.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerJob.label) .. ' (' .. (not not data.player.onduty and 'on duty' or 'off duty') .. ')',
-            isMenuHeader = true,
-            icon = 'fa-solid fa-circle-info'
-        },
-    }
-    for k, v in pairs(QBCore.Shared.Jobs[data.work.name].grades) do
-        EmployeeMenu[#EmployeeMenu + 1] = {
-            header = v.name,
-            txt = Lang:t('body.grade') .. k,
-            params = {
-                isServer = true,
-                event = 'qb-bossmenu:server:GradeUpdate',
-                icon = 'fa-solid fa-file-pen',
-                args = {
-                    cid = data.player.empSource,
-                    grade = tonumber(k),
-                    gradename = v.name
-                }
-            }
-        }
-    end
-
-    EmployeeMenu[#EmployeeMenu + 1] = {
-        header = Lang:t('body.dutyemp'),
-        icon = 'fa-solid fa-user-large-slash',
-        params = {
-            isServer = true,
-            event = 'qb-bossmenu:server:toggleEmployeeDuty',
-            args = data.player.empSource
-        }
-    }
-
-    EmployeeMenu[#EmployeeMenu + 1] = {
-        header = Lang:t('body.fireemp'),
-        icon = 'fa-solid fa-user-large-slash',
-        params = {
-            isServer = true,
-            event = 'qb-bossmenu:server:FireEmployee',
-            args = data.player.empSource
-        }
-    }
-
-
-    EmployeeMenu[#EmployeeMenu + 1] = {
-        header = Lang:t('body.return'),
-        icon = 'fa-solid fa-angle-left',
-        params = {
-            event = 'qb-bossmenu:client:OpenMenu',
-        }
-    }
-    exports['qb-menu']:openMenu(EmployeeMenu)
-end)
-
-RegisterNetEvent('qb-bossmenu:client:Stash', function()
-    TriggerServerEvent('inventory:server:OpenInventory', 'stash', 'boss_' .. PlayerJob.name, {
-        maxweight = 4000000,
-        slots = 25,
-    })
-    TriggerEvent('inventory:client:SetCurrentStash', 'boss_' .. PlayerJob.name)
-end)
-
-RegisterNetEvent('qb-bossmenu:client:Wardrobe', function()
-    TriggerEvent('qb-clothing:client:openOutfitMenu')
-end)
-
-RegisterNetEvent('qb-bossmenu:client:HireMenu', function()
-    local HireMenu = {
-        {
-            header = Lang:t('body.hireemp') .. string.upper(PlayerJob.label),
-            isMenuHeader = true,
-            icon = 'fa-solid fa-circle-info',
-        },
-    }
-    QBCore.Functions.TriggerCallback('qb-bossmenu:getplayers', function(players)
-        for _, v in pairs(players) do
-            if v and v ~= PlayerId() then
-                HireMenu[#HireMenu + 1] = {
-                    header = v.name,
-                    txt = Lang:t('body.cid') .. v.citizenid .. ' - ID: ' .. v.sourceplayer,
-                    icon = 'fa-solid fa-user-check',
-                    params = {
-                        isServer = true,
-                        event = 'qb-bossmenu:server:HireEmployee',
-                        args = v.sourceplayer
-                    }
-                }
-            end
-        end
-        HireMenu[#HireMenu + 1] = {
-            header = Lang:t('body.return'),
-            icon = 'fa-solid fa-angle-left',
-            params = {
-                event = 'qb-bossmenu:client:OpenMenu',
-            }
-        }
-        exports['qb-menu']:openMenu(HireMenu)
-    end)
-end)
-
--- MAIN THREAD
-CreateThread(function()
-    if Config.UseTarget then
-        for job, zones in pairs(Config.BossMenuZones) do
-            for index, data in ipairs(zones) do
-                exports['qb-target']:AddBoxZone(job .. '-BossMenu-' .. index, data.coords, data.length, data.width, {
-                    name = job .. '-BossMenu-' .. index,
-                    heading = data.heading,
-                    -- debugPoly = true,
-                    minZ = data.minZ,
-                    maxZ = data.maxZ,
-                }, {
-                    options = {
-                        {
-                            type = 'client',
-                            event = 'qb-bossmenu:client:OpenMenu',
-                            icon = 'fas fa-sign-in-alt',
-                            label = Lang:t('target.label'),
-                            canInteract = function() return job == PlayerJob.name and PlayerJob.isboss end,
-                        },
-                    },
-                    distance = 2.5
-                })
-            end
-        end
-    else
-        while true do
-            local wait = 2500
-            local pos = GetEntityCoords(PlayerPedId())
-            local inRangeBoss = false
-            local nearBossmenu = false
-            if PlayerJob then
-                wait = 0
-                for k, menus in pairs(Config.BossMenus) do
-                    for _, coords in ipairs(menus) do
-                        if k == PlayerJob.name and PlayerJob.isboss then
-                            if #(pos - coords) < 5.0 then
-                                inRangeBoss = true
-                                if #(pos - coords) <= 1.5 then
-                                    nearBossmenu = true
-                                    if not shownBossMenu then
-                                        exports['qb-core']:DrawText(Lang:t('drawtext.label'), 'left')
-                                        shownBossMenu = true
-                                    end
-                                    if IsControlJustReleased(0, 38) then
-                                        exports['qb-core']:HideText()
-                                        TriggerEvent('qb-bossmenu:client:OpenMenu')
-                                    end
-                                end
-
-                                if not nearBossmenu and shownBossMenu then
-                                    CloseMenuFull()
-                                    shownBossMenu = false
-                                end
-                            end
-                        end
-                    end
-                end
-                if not inRangeBoss then
-                    Wait(1500)
-                    if shownBossMenu then
-                        CloseMenuFull()
-                        shownBossMenu = false
-                    end
-                end
-            end
-            Wait(wait)
-        end
-    end
+-- Get closest player sv
+QBCore.Functions.CreateCallback('qb-bossmenu:getplayers', function(source, cb)
+	local src = source
+	local players = {}
+	local PlayerPed = GetPlayerPed(src)
+	local pCoords = GetEntityCoords(PlayerPed)
+	for _, v in pairs(QBCore.Functions.GetPlayers()) do
+		local targetped = GetPlayerPed(v)
+		local tCoords = GetEntityCoords(targetped)
+		local dist = #(pCoords - tCoords)
+		if PlayerPed ~= targetped and dist < 10 then
+			local ped = QBCore.Functions.GetPlayer(v)
+			players[#players + 1] = {
+				id = v,
+				coords = GetEntityCoords(targetped),
+				name = ped.PlayerData.charinfo.firstname .. ' ' .. ped.PlayerData.charinfo.lastname,
+				citizenid = ped.PlayerData.citizenid,
+				sources = GetPlayerPed(ped.PlayerData.source),
+				sourceplayer = ped.PlayerData.source
+			}
+		end
+	end
+	table.sort(players, function(a, b)
+		return a.name < b.name
+	end)
+	cb(players)
 end)
