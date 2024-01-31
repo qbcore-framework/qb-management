@@ -159,7 +159,7 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
 
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = Lang:t('body.dutyemp'),
-        icon = 'fa-solid fa-user-large-slash',
+        icon = not not data.player.onduty and 'fa-solid fa-user-minus' or 'fa-solid fa-user-plus',
         params = {
             isServer = true,
             event = 'qb-bossmenu:server:toggleEmployeeDuty',
