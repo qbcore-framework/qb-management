@@ -3,8 +3,6 @@ local PlayerJob = QBCore.Functions.GetPlayerData().job
 local shownBossMenu = false
 local DynamicMenuItems = {}
 
-
-
 -- UTIL
 local function CloseMenuFull()
     exports['qb-menu']:closeMenu()
@@ -42,7 +40,7 @@ end)
 
 RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
     if not PlayerJob.name or not PlayerJob.isboss then return end
-
+    
     local bossMenu = {
         {
             header = Lang:t('headers.bsm') .. string.upper(PlayerJob.label),
@@ -82,11 +80,11 @@ RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
             }
         }
     }
-
+    
     for _, v in pairs(DynamicMenuItems) do
         bossMenu[#bossMenu + 1] = v
     end
-
+    
     bossMenu[#bossMenu + 1] = {
         header = Lang:t('body.exit'),
         icon = 'fa-solid fa-angle-left',
@@ -94,7 +92,7 @@ RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
             event = 'qb-menu:closeMenu',
         }
     }
-
+    
     exports['qb-menu']:openMenu(bossMenu)
 end)
 
@@ -135,7 +133,7 @@ end)
 RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
     local EmployeeMenu = {
         {
-            header = Lang:t('body.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerJob.label) .. ' (' .. (not not data.player.onduty and 'on duty' or 'off duty') .. ')',
+            header = Lang:t('body.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerJob.label) .. ' (' .. (data.player.onduty and 'on duty' or 'off duty') .. ')',
             isMenuHeader = true,
             icon = 'fa-solid fa-circle-info'
         },
@@ -156,17 +154,17 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
             }
         }
     end
-
+    
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = Lang:t('body.dutyemp'),
-        icon = not not data.player.onduty and 'fa-solid fa-user-minus' or 'fa-solid fa-user-plus',
+        icon = data.player.onduty and 'fa-solid fa-user-minus' or 'fa-solid fa-user-plus',
         params = {
             isServer = true,
             event = 'qb-bossmenu:server:toggleEmployeeDuty',
             args = data.player.empSource
         }
     }
-
+    
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = Lang:t('body.fireemp'),
         icon = 'fa-solid fa-user-large-slash',
@@ -176,8 +174,7 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
             args = data.player.empSource
         }
     }
-
-
+    
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = Lang:t('body.return'),
         icon = 'fa-solid fa-angle-left',
@@ -283,7 +280,7 @@ CreateThread(function()
                                         TriggerEvent('qb-bossmenu:client:OpenMenu')
                                     end
                                 end
-
+                                
                                 if not nearBossmenu and shownBossMenu then
                                     CloseMenuFull()
                                     shownBossMenu = false
