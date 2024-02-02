@@ -151,10 +151,8 @@ RegisterNetEvent('qb-bossmenu:server:toggleEmployeeDuty', function(target)
 		return
 	end
 
-	if Target then
+	if Target and Player.PlayerData.job.name == Target.PlayerData.job.name then
 		Target.Functions.SetJobDuty(not Target.PlayerData.job.onduty)
-
-		Wait(5000) -- Give time for the client to update the duty status
 
 		if Target.PlayerData.job.onduty then
 			TriggerClientEvent('QBCore:Notify', src, 'You toggled on duty!', 'info')
