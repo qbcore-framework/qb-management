@@ -37,6 +37,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 					empSource = isOnline.PlayerData.citizenid,
 					grade = isOnline.PlayerData.job.grade,
 					isboss = isOnline.PlayerData.job.isboss,
+					onduty = isOnline.PlayerData.job.onduty,
 					name = '🟢 ' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
 				}
 			elseif value.job.name == jobname then
@@ -44,6 +45,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 					empSource = value.citizenid,
 					grade = value.job.grade,
 					isboss = value.job.isboss,
+					onduty = false,
 					name = '❌ ' .. value.charinfo.firstname .. ' ' .. value.charinfo.lastname
 				}
 			end
@@ -135,6 +137,32 @@ RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 			TriggerClientEvent('QBCore:Notify', src, 'Civilian not in city.', 'error')
 		end
 	end
+	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
+end)
+
+-- Toggle Duty
+RegisterNetEvent('qb-bossmenu:server:toggleEmployeeDuty', function(target)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	local Target = QBCore.Functions.GetPlayerByCitizenId(target)
+
+	if not Player.PlayerData.job.isboss then
+		ExploitBan(src, 'HireEmployee Exploiting')
+		return
+	end
+
+	if Target and Player.PlayerData.job.name == Target.PlayerData.job.name then
+		Target.Functions.SetJobDuty(not Target.PlayerData.job.onduty)
+
+		if Target.PlayerData.job.onduty then
+			TriggerClientEvent('QBCore:Notify', src, 'You toggled on duty!', 'info')
+			TriggerClientEvent('QBCore:Notify', Target.PlayerData.source, 'You are now on duty!', 'info')
+		else
+			TriggerClientEvent('QBCore:Notify', src, 'You toggled off duty!', 'info')
+			TriggerClientEvent('QBCore:Notify', Target.PlayerData.source, 'You are now off duty!', 'info')
+		end	
+	end
+
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
 
