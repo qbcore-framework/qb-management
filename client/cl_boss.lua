@@ -95,7 +95,6 @@ RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
 
     exports['qb-menu']:openMenu(bossMenu)
 end)
-
 RegisterNetEvent('qb-bossmenu:client:employeelist', function()
     local EmployeesMenu = {
         {
