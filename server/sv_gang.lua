@@ -4,31 +4,23 @@ local QBCore = exports['qb-core']:GetCoreObject()
 QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(source, cb, gangname)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-
 	if not Player.PlayerData.gang.isboss then
 		ExploitBan(src, 'GetEmployees Exploiting')
 		return
 	end
-
 	local employees = {}
-	local players = MySQL.query.await("SELECT * FROM `players` WHERE `gang` LIKE '%" .. gangname .. "%'", {})
+	local players = MySQL.query.await('SELECT citizenid,gang,charinfo FROM `players` WHERE JSON_EXTRACT(job, "$.name") = ?', { gangname })
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
 			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
-
-			if isOnline then
-				employees[#employees + 1] = {
-					empSource = isOnline.PlayerData.citizenid,
-					grade = isOnline.PlayerData.gang.grade,
-					isboss = isOnline.PlayerData.gang.isboss,
-					name = '🟢' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
-				}
-			else
+			local gang = json.decode(value.gang)
+			local charinfo = json.decode(value.charinfo)
+			if gang.name == gangname then
 				employees[#employees + 1] = {
 					empSource = value.citizenid,
-					grade = json.decode(value.gang).grade,
-					isboss = json.decode(value.gang).isboss,
-					name = '❌' .. json.decode(value.charinfo).firstname .. ' ' .. json.decode(value.charinfo).lastname
+					grade = gang.grade,
+					isboss = gang.isboss,
+					name = ''..(isOnline and '🟢' or '❌')..' ' .. charinfo.firstname .. ' ' .. charinfo.lastname
 				}
 			end
 		end
@@ -96,6 +88,7 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 		if player[1] ~= nil then
 			Employee = player[1]
 			Employee.gang = json.decode(Employee.gang)
+			local charinfo = json.decode(Employee.charinfo)
 			if Employee.gang.grade.level > Player.PlayerData.gang.grade.level then
 				TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
 				return
@@ -111,7 +104,7 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 			gang.grade.level = 0
 			MySQL.update('UPDATE players SET gang = ? WHERE citizenid = ?', { json.encode(gang), target })
 			TriggerClientEvent('QBCore:Notify', src, 'Gang member fired!', 'success')
-			TriggerEvent('qb-log:server:CreateLog', 'gangmenu', 'Gang Fire', 'orange', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.gang.name .. ')', false)
+			TriggerEvent('qb-log:server:CreateLog', 'gangmenu', 'Gang Fire', 'orange', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. charinfo.firstname .. ' ' .. charinfo.lastname .. ' (' .. Player.PlayerData.gang.name .. ')', false)
 		else
 			TriggerClientEvent('QBCore:Notify', src, 'Civilian is not in city.', 'error')
 		end
