@@ -30,21 +30,15 @@ QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(sour
 
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
-			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
+			local Target = QBCore.Functions.GetPlayerByCitizenId(value.citizenid) or QBCore.Functions.GetOfflinePlayerByCitizenId(value.citizenid)
 
-			if isOnline and isOnline.PlayerData.job.name == jobname then
+			if Target and Target.PlayerData.job.name == jobname then
+				local isOnline = Target.PlayerData.source
 				employees[#employees + 1] = {
-					empSource = isOnline.PlayerData.citizenid,
-					grade = isOnline.PlayerData.job.grade,
-					isboss = isOnline.PlayerData.job.isboss,
-					name = '🟢 ' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
-				}
-			elseif value.job.name == jobname then
-				employees[#employees + 1] = {
-					empSource = value.citizenid,
-					grade = value.job.grade,
-					isboss = value.job.isboss,
-					name = '❌ ' .. value.charinfo.firstname .. ' ' .. value.charinfo.lastname
+					empSource = Target.PlayerData.citizenid,
+					grade = Target.PlayerData.job.grade,
+					isboss = Target.PlayerData.job.isboss,
+					name = (isOnline and '🟢 ' or '❌ ') .. Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname
 				}
 			end
 		end
@@ -82,7 +76,7 @@ end)
 RegisterNetEvent('qb-bossmenu:server:GradeUpdate', function(data)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid)
+	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid) or QBCore.Functions.GetOfflinePlayerByCitizenId(data.cid)
 
 	if not Player.PlayerData.job.isboss then
 		ExploitBan(src, 'GradeUpdate Exploiting')
@@ -95,13 +89,15 @@ RegisterNetEvent('qb-bossmenu:server:GradeUpdate', function(data)
 
 	if Employee then
 		if Employee.Functions.SetJob(Player.PlayerData.job.name, data.grade) then
-			TriggerClientEvent('QBCore:Notify', src, 'Sucessfulluy promoted!', 'success')
-			TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been promoted to' .. data.gradename .. '.', 'success')
+			TriggerClientEvent('QBCore:Notify', src, 'Sucessfully promoted!', 'success')
+			Employee.Functions.Save()
+
+			if Employee.PlayerData.source then -- Player is online
+				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been promoted to' .. data.gradename .. '.', 'success')
+			end
 		else
 			TriggerClientEvent('QBCore:Notify', src, 'Promotion grade does not exist.', 'error')
 		end
-	else
-		TriggerClientEvent('QBCore:Notify', src, 'Civilian not in city.', 'error')
 	end
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)
 end)
@@ -110,7 +106,7 @@ end)
 RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-	local Employee = QBCore.Functions.GetPlayerByCitizenId(target)
+	local Employee = QBCore.Functions.GetPlayerByCitizenId(target) or QBCore.Functions.GetOfflinePlayerByCitizenId(target)
 
 	if not Player.PlayerData.job.isboss then
 		ExploitBan(src, 'FireEmployee Exploiting')
@@ -118,44 +114,23 @@ RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 	end
 
 	if Employee then
-		if target ~= Player.PlayerData.citizenid then
-			if Employee.PlayerData.job.grade.level > Player.PlayerData.job.grade.level then
-				TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
-				return
-			end
-			if Employee.Functions.SetJob('unemployed', '0') then
-				TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Job Fire', 'red', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.job.name .. ')', false)
-				TriggerClientEvent('QBCore:Notify', src, 'Employee fired!', 'success')
-				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been fired! Good luck.', 'error')
-			else
-				TriggerClientEvent('QBCore:Notify', src, 'Error..', 'error')
-			end
-		else
+		if target == Player.PlayerData.citizenid then
 			TriggerClientEvent('QBCore:Notify', src, 'You can\'t fire yourself', 'error')
+			return
+		elseif Employee.PlayerData.job.grade.level > Player.PlayerData.job.grade.level then
+			TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
+			return
 		end
-	else
-		local player = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { target })
-		if player[1] ~= nil then
-			Employee = player[1]
-			Employee.job = json.decode(Employee.job)
-			if Employee.job.grade.level > Player.PlayerData.job.grade.level then
-				TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
-				return
-			end
-			local job = {}
-			job.name = 'unemployed'
-			job.label = 'Unemployed'
-			job.payment = QBCore.Shared.Jobs[job.name].grades['0'].payment or 500
-			job.onduty = true
-			job.isboss = false
-			job.grade = {}
-			job.grade.name = nil
-			job.grade.level = 0
-			MySQL.update('UPDATE players SET job = ? WHERE citizenid = ?', { json.encode(job), target })
+		if Employee.Functions.SetJob('unemployed', '0') then
+			Employee.Functions.Save()
 			TriggerClientEvent('QBCore:Notify', src, 'Employee fired!', 'success')
 			TriggerEvent('qb-log:server:CreateLog', 'bossmenu', 'Job Fire', 'red', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.job.name .. ')', false)
+
+			if Employee.PlayerData.source then -- Player is online
+				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been fired! Good luck.', 'error')
+			end
 		else
-			TriggerClientEvent('QBCore:Notify', src, 'Civilian not in city.', 'error')
+			TriggerClientEvent('QBCore:Notify', src, 'Error..', 'error')
 		end
 	end
 	TriggerClientEvent('qb-bossmenu:client:OpenMenu', src)

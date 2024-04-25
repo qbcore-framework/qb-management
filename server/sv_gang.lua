@@ -14,21 +14,15 @@ QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(sour
 	local players = MySQL.query.await("SELECT * FROM `players` WHERE `gang` LIKE '%" .. gangname .. "%'", {})
 	if players[1] ~= nil then
 		for _, value in pairs(players) do
-			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
+			local Target = QBCore.Functions.GetPlayerByCitizenId(value.citizenid) or QBCore.Functions.GetOfflinePlayerByCitizenId(value.citizenid)
 
-			if isOnline then
+			if Target then
+				local isOnline = Target.PlayerData.source
 				employees[#employees + 1] = {
-					empSource = isOnline.PlayerData.citizenid,
-					grade = isOnline.PlayerData.gang.grade,
-					isboss = isOnline.PlayerData.gang.isboss,
-					name = '🟢' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
-				}
-			else
-				employees[#employees + 1] = {
-					empSource = value.citizenid,
-					grade = json.decode(value.gang).grade,
-					isboss = json.decode(value.gang).isboss,
-					name = '❌' .. json.decode(value.charinfo).firstname .. ' ' .. json.decode(value.charinfo).lastname
+					empSource = Target.PlayerData.citizenid,
+					grade = Target.PlayerData.gang.grade,
+					isboss = Target.PlayerData.gang.isboss,
+					name = (isOnline and '🟢 ' or '❌ ') .. Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname
 				}
 			end
 		end
@@ -63,7 +57,7 @@ end)
 RegisterNetEvent('qb-gangmenu:server:GradeUpdate', function(data)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid)
+	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid) or QBCore.Functions.GetOfflinePlayerByCitizenId(data.cid)
 
 	if not Player.PlayerData.gang.isboss then
 		ExploitBan(src, 'GradeUpdate Exploiting')
@@ -77,12 +71,14 @@ RegisterNetEvent('qb-gangmenu:server:GradeUpdate', function(data)
 	if Employee then
 		if Employee.Functions.SetGang(Player.PlayerData.gang.name, data.grade) then
 			TriggerClientEvent('QBCore:Notify', src, 'Successfully promoted!', 'success')
-			TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been promoted to ' .. data.gradename .. '.', 'success')
+			Employee.Functions.Save()
+
+			if Employee.PlayerData.source then
+				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been promoted to ' .. data.gradename .. '.', 'success')
+			end
 		else
 			TriggerClientEvent('QBCore:Notify', src, 'Grade does not exist.', 'error')
 		end
-	else
-		TriggerClientEvent('QBCore:Notify', src, 'Civilian is not in city.', 'error')
 	end
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
 end)
@@ -91,7 +87,7 @@ end)
 RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-	local Employee = QBCore.Functions.GetPlayerByCitizenId(target)
+	local Employee = QBCore.Functions.GetPlayerByCitizenId(target) or QBCore.Functions.GetOfflinePlayerByCitizenId(target)
 
 	if not Player.PlayerData.gang.isboss then
 		ExploitBan(src, 'FireEmployee Exploiting')
@@ -99,44 +95,23 @@ RegisterNetEvent('qb-gangmenu:server:FireMember', function(target)
 	end
 
 	if Employee then
-		if target ~= Player.PlayerData.citizenid then
-			if Employee.PlayerData.gang.grade.level > Player.PlayerData.gang.grade.level then
-				TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
-				return
-			end
-			if Employee.Functions.SetGang('none', '0') then
-				TriggerEvent('qb-log:server:CreateLog', 'gangmenu', 'Gang Fire', 'orange', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.gang.name .. ')', false)
-				TriggerClientEvent('QBCore:Notify', src, 'Gang Member fired!', 'success')
-				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been expelled from the gang!', 'error')
-			else
-				TriggerClientEvent('QBCore:Notify', src, 'Error.', 'error')
-			end
-		else
+		if target == Player.PlayerData.citizenid then
 			TriggerClientEvent('QBCore:Notify', src, 'You can\'t kick yourself out of the gang!', 'error')
+			return
+		elseif Employee.PlayerData.gang.grade.level > Player.PlayerData.gang.grade.level then
+			TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
+			return
 		end
-	else
-		local player = MySQL.query.await('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { target })
-		if player[1] ~= nil then
-			Employee = player[1]
-			Employee.gang = json.decode(Employee.gang)
-			if Employee.gang.grade.level > Player.PlayerData.gang.grade.level then
-				TriggerClientEvent('QBCore:Notify', src, 'You cannot fire this citizen!', 'error')
-				return
-			end
-			local gang = {}
-			gang.name = 'none'
-			gang.label = 'No Affiliation'
-			gang.payment = 0
-			gang.onduty = true
-			gang.isboss = false
-			gang.grade = {}
-			gang.grade.name = nil
-			gang.grade.level = 0
-			MySQL.update('UPDATE players SET gang = ? WHERE citizenid = ?', { json.encode(gang), target })
-			TriggerClientEvent('QBCore:Notify', src, 'Gang member fired!', 'success')
+		if Employee.Functions.SetGang('none', '0') then
+			Employee.Functions.Save()
 			TriggerEvent('qb-log:server:CreateLog', 'gangmenu', 'Gang Fire', 'orange', Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname .. ' successfully fired ' .. Employee.PlayerData.charinfo.firstname .. ' ' .. Employee.PlayerData.charinfo.lastname .. ' (' .. Player.PlayerData.gang.name .. ')', false)
+			TriggerClientEvent('QBCore:Notify', src, 'Gang Member fired!', 'success')
+
+			if Employee.PlayerData.source then -- Player is online
+				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been expelled from the gang!', 'error')
+			end
 		else
-			TriggerClientEvent('QBCore:Notify', src, 'Civilian is not in city.', 'error')
+			TriggerClientEvent('QBCore:Notify', src, 'Error.', 'error')
 		end
 	end
 	TriggerClientEvent('qb-gangmenu:client:OpenMenu', src)
