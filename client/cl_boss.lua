@@ -222,14 +222,13 @@ end)
 -- MAIN THREAD
 CreateThread(function()
     if Config.UseTarget then
-        for job, zones in pairs(Config.BossMenuZones) do
-            for index, data in ipairs(zones) do
-                exports['qb-target']:AddBoxZone(job .. '-BossMenu-' .. index, data.coords, data.length, data.width, {
-                    name = job .. '-BossMenu-' .. index,
-                    heading = data.heading,
-                    -- debugPoly = true,
-                    minZ = data.minZ,
-                    maxZ = data.maxZ,
+        for job, zones in pairs(Config.BossMenus) do
+            for index, coords in ipairs(zones) do
+                local zoneName = job .. '_bossmenu_' .. index
+                exports['qb-target']:AddCircleZone(zoneName, coords, 0.5, {
+                    name = zoneName,
+                    debugPoly = false,
+                    useZ = true
                 }, {
                     options = {
                         {
