@@ -16,43 +16,46 @@ end
 
 -- Get Employees
 QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(source, cb, jobname)
-	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
 
-	if not Player.PlayerData.job.isboss then
-		ExploitBan(src, 'GetEmployees Exploiting')
-		return
-	end
+    if not Player.PlayerData.job.isboss then
+        ExploitBan(src, 'GetEmployees Exploiting')
+        return
+    end
 
-	local employees = {}
+    local employees = {}
+    local players = MySQL.query.await("SELECT * FROM `players` WHERE JSON_EXTRACT(job, '$.name') = @jobname", {['@jobname'] = jobname})
 
-	local players = MySQL.query.await("SELECT * FROM `players` WHERE `job` LIKE '%" .. jobname .. "%'", {})
+    if players[1] ~= nil then
+        for _, value in pairs(players) do
+            local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
+            local charinfo = json.decode(value.charinfo)
+            local jobinfo = json.decode(value.job)
 
-	if players[1] ~= nil then
-		for _, value in pairs(players) do
-			local isOnline = QBCore.Functions.GetPlayerByCitizenId(value.citizenid)
+            if isOnline then
+                table.insert(employees, {
+                    empSource = isOnline.PlayerData.citizenid,
+                    grade = isOnline.PlayerData.job.grade,
+                    isboss = isOnline.PlayerData.job.isboss,
+                    name = '🟢 ' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
+                })
+            else
+                table.insert(employees, {
+                    empSource = value.citizenid,
+                    grade = jobinfo.grade,
+                    isboss = jobinfo.isboss,
+                    name = '❌ ' .. charinfo.firstname .. ' ' .. charinfo.lastname
+                })
+            end
+        end
 
-			if isOnline and isOnline.PlayerData.job.name == jobname then
-				employees[#employees + 1] = {
-					empSource = isOnline.PlayerData.citizenid,
-					grade = isOnline.PlayerData.job.grade,
-					isboss = isOnline.PlayerData.job.isboss,
-					name = '🟢 ' .. isOnline.PlayerData.charinfo.firstname .. ' ' .. isOnline.PlayerData.charinfo.lastname
-				}
-			elseif value.job.name == jobname then
-				employees[#employees + 1] = {
-					empSource = value.citizenid,
-					grade = value.job.grade,
-					isboss = value.job.isboss,
-					name = '❌ ' .. value.charinfo.firstname .. ' ' .. value.charinfo.lastname
-				}
-			end
-		end
-		table.sort(employees, function(a, b)
-			return a.grade.level > b.grade.level
-		end)
-	end
-	cb(employees)
+        table.sort(employees, function(a, b)
+            return a.grade.level > b.grade.level
+        end)
+    end
+
+    cb(employees)
 end)
 
 -- Grade Change
