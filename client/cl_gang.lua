@@ -26,14 +26,6 @@ RegisterNetEvent('QBCore:Client:OnGangUpdate', function(InfoGang)
     PlayerGang = InfoGang
 end)
 
-RegisterNetEvent('qb-gangmenu:client:Stash', function()
-    TriggerServerEvent('inventory:server:OpenInventory', 'stash', 'boss_' .. PlayerGang.name, {
-        maxweight = 4000000,
-        slots = 100,
-    })
-    TriggerEvent('inventory:client:SetCurrentStash', 'boss_' .. PlayerGang.name)
-end)
-
 RegisterNetEvent('qb-gangmenu:client:Warbobe', function()
     TriggerEvent('qb-clothing:client:openOutfitMenu')
 end)
@@ -81,7 +73,8 @@ RegisterNetEvent('qb-gangmenu:client:OpenMenu', function()
             txt = Lang:t('bodygang.storaged'),
             icon = 'fa-solid fa-box-open',
             params = {
-                event = 'qb-gangmenu:client:Stash',
+                isServer = true,
+                event = 'qb-gangmenu:server:stash',
             }
         },
         {

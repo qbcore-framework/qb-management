@@ -36,6 +36,29 @@ QBCore.Functions.CreateCallback('qb-gangmenu:server:GetEmployees', function(sour
 	cb(employees)
 end)
 
+RegisterNetEvent('qb-gangmenu:server:stash', function()
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if not Player then return end
+	local playerGang = Player.PlayerData.gang
+	if not playerGang.isboss then return end
+	local playerPed = GetPlayerPed(src)
+	local playerCoords = GetEntityCoords(playerPed)
+	if not Config.GangMenus[playerGang.name] then return end
+	local bossCoords = Config.GangMenus[playerGang.name]
+	for i = 1, #bossCoords do
+		local coords = bossCoords[i]
+		if #(playerCoords - coords) < 2.5 then
+			local stashName = 'boss_' .. playerGang.name
+			exports['qb-inventory']:OpenInventory(src, stashName, {
+				maxweight = 4000000,
+				slots = 25,
+			})
+			return
+		end
+	end
+end)
+
 -- Grade Change
 RegisterNetEvent('qb-gangmenu:server:GradeUpdate', function(data)
 	local src = source

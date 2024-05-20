@@ -68,7 +68,8 @@ RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
             txt = Lang:t('body.storaged'),
             icon = 'fa-solid fa-box-open',
             params = {
-                event = 'qb-bossmenu:client:Stash',
+                isServer = true,
+                event = 'qb-bossmenu:server:stash',
             }
         },
         {
@@ -171,14 +172,6 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
         }
     }
     exports['qb-menu']:openMenu(EmployeeMenu)
-end)
-
-RegisterNetEvent('qb-bossmenu:client:Stash', function()
-    TriggerServerEvent('inventory:server:OpenInventory', 'stash', 'boss_' .. PlayerJob.name, {
-        maxweight = 4000000,
-        slots = 25,
-    })
-    TriggerEvent('inventory:client:SetCurrentStash', 'boss_' .. PlayerJob.name)
 end)
 
 RegisterNetEvent('qb-bossmenu:client:Wardrobe', function()
