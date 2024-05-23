@@ -1,6 +1,7 @@
 # qb-management
-
-New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-input, with SQL support for society funds!
+- Manage employees online or offline!
+- Access a personal boss level stash!
+- Allows for multiple boss menu locations!
 
 ## Dependencies
 - [qb-core](https://github.com/qbcore-framework/qb-core)
@@ -9,10 +10,6 @@ New qb-bossmenu / qb-gangmenu converted into one resource using qb-menu and qb-i
 - [qb-menu](https://github.com/qbcore-framework/qb-menu)
 - [qb-inventory](https://github.com/qbcore-framework/qb-inventory)
 - [qb-clothing](https://github.com/qbcore-framework/qb-clothing)
-
-## Screenshots
-![image](https://i.imgur.com/9yiQZDX.png)
-![image](https://i.imgur.com/MRMWeqX.png)
 
 # License
 
