@@ -1,4 +1,4 @@
--- Add translations by MC
+-- Add translations by Cocodrulo
 local Translations = {
     headers = {
         ['bsm'] = 'Menú de Jefe - ',
@@ -30,7 +30,7 @@ local Translations = {
         ['submit'] = 'Confirmar',
         ['amount'] = 'Monto',
         ['return'] = 'Volver',
-        ['exit'] = 'Volver',
+        ['exit'] = 'Salir',
     },
     drawtext = {
         ['label'] = '[E] Abrir gestión de trabajo',
