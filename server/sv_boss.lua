@@ -93,7 +93,7 @@ RegisterNetEvent('qb-bossmenu:server:GradeUpdate', function(data)
 			Employee.Functions.Save()
 
 			if Employee.PlayerData.source then -- Player is online
-				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been promoted to' .. data.gradename .. '.', 'success')
+				TriggerClientEvent('QBCore:Notify', Employee.PlayerData.source, 'You have been promoted to ' .. data.gradename .. '.', 'success')
 			end
 		else
 			TriggerClientEvent('QBCore:Notify', src, 'Promotion grade does not exist.', 'error')
