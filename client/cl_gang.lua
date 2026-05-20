@@ -1,4 +1,5 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qb-core']:GetCoreObject({ 'Functions' })
+local sharedGangs = exports['qb-core']:GetShared('Gangs')
 local PlayerGang = QBCore.Functions.GetPlayerData().gang
 local shownGangMenu = false
 local DynamicMenuItems = {}
@@ -22,8 +23,14 @@ RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerGang = QBCore.Functions.GetPlayerData().gang
 end)
 
-RegisterNetEvent('QBCore:Client:OnGangUpdate', function(InfoGang)
-    PlayerGang = InfoGang
+RegisterNetEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
+    if key == 'gang' then
+        local InfoGang = val
+        PlayerGang = InfoGang
+    elseif key == 'all' then
+        local InfoGang = val.gang
+        PlayerGang = InfoGang
+    end
 end)
 
 RegisterNetEvent('qb-gangmenu:client:Warbobe', function()
@@ -144,7 +151,7 @@ RegisterNetEvent('qb-gangmenu:lient:ManageMember', function(data)
             icon = 'fa-solid fa-circle-info',
         },
     }
-    for k, v in pairs(QBCore.Shared.Gangs[data.work.name].grades) do
+    for k, v in pairs(sharedGangs[data.work.name].grades) do
         MemberMenu[#MemberMenu + 1] = {
             header = v.name,
             txt = Lang:t('bodygang.grade') .. k,

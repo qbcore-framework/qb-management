@@ -1,4 +1,4 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qb-core']:GetCoreObject({ 'Functions' })
 
 function ExploitBan(id, reason)
 	MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', {
@@ -17,7 +17,7 @@ end
 -- Get Employees
 QBCore.Functions.CreateCallback('qb-bossmenu:server:GetEmployees', function(source, cb, jobname)
 	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
+	local Player = exports['qb-core']:GetPlayer(src)
 
 	if not Player.PlayerData.job.isboss then
 		ExploitBan(src, 'GetEmployees Exploiting')
@@ -51,7 +51,7 @@ end)
 
 RegisterNetEvent('qb-bossmenu:server:stash', function()
 	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
+	local Player = exports['qb-core']:GetPlayer(src)
 	if not Player then return end
 	local playerJob = Player.PlayerData.job
 	if not playerJob.isboss then return end
@@ -75,7 +75,7 @@ end)
 -- Grade Change
 RegisterNetEvent('qb-bossmenu:server:GradeUpdate', function(data)
 	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
+	local Player = exports['qb-core']:GetPlayer(src)
 	local Employee = QBCore.Functions.GetPlayerByCitizenId(data.cid) or QBCore.Functions.GetOfflinePlayerByCitizenId(data.cid)
 
 	if not Player.PlayerData.job.isboss then
@@ -105,7 +105,7 @@ end)
 -- Fire Employee
 RegisterNetEvent('qb-bossmenu:server:FireEmployee', function(target)
 	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
+	local Player = exports['qb-core']:GetPlayer(src)
 	local Employee = QBCore.Functions.GetPlayerByCitizenId(target) or QBCore.Functions.GetOfflinePlayerByCitizenId(target)
 
 	if not Player.PlayerData.job.isboss then
@@ -139,8 +139,8 @@ end)
 -- Recruit Player
 RegisterNetEvent('qb-bossmenu:server:HireEmployee', function(recruit)
 	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
-	local Target = QBCore.Functions.GetPlayer(recruit)
+	local Player = exports['qb-core']:GetPlayer(src)
+	local Target = exports['qb-core']:GetPlayer(recruit)
 
 	if not Player.PlayerData.job.isboss then
 		ExploitBan(src, 'HireEmployee Exploiting')
@@ -166,7 +166,7 @@ QBCore.Functions.CreateCallback('qb-bossmenu:getplayers', function(source, cb)
 		local tCoords = GetEntityCoords(targetped)
 		local dist = #(pCoords - tCoords)
 		if PlayerPed ~= targetped and dist < 10 then
-			local ped = QBCore.Functions.GetPlayer(v)
+			local ped = exports['qb-core']:GetPlayer(v)
 			players[#players + 1] = {
 				id = v,
 				coords = GetEntityCoords(targetped),

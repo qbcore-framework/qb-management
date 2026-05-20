@@ -1,4 +1,5 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qb-core']:GetCoreObject({ 'Functions' })
+local sharedJobs = exports['qb-core']:GetShared('Jobs')
 local PlayerJob = QBCore.Functions.GetPlayerData().job
 local shownBossMenu = false
 local DynamicMenuItems = {}
@@ -34,8 +35,14 @@ RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerJob = QBCore.Functions.GetPlayerData().job
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    PlayerJob = JobInfo
+RegisterNetEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
+    if key == 'job' then
+        local JobInfo = val
+        PlayerJob = JobInfo
+    elseif key == 'all' then
+        local JobInfo = val.job
+        PlayerJob = JobInfo
+    end
 end)
 
 RegisterNetEvent('qb-bossmenu:client:OpenMenu', function()
@@ -139,7 +146,7 @@ RegisterNetEvent('qb-bossmenu:client:ManageEmployee', function(data)
             icon = 'fa-solid fa-circle-info'
         },
     }
-    for k, v in pairs(QBCore.Shared.Jobs[data.work.name].grades) do
+    for k, v in pairs(sharedJobs[data.work.name].grades) do
         EmployeeMenu[#EmployeeMenu + 1] = {
             header = v.name,
             txt = Lang:t('body.grade') .. k,
